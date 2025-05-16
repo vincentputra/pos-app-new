@@ -6,7 +6,12 @@ type User = {
   id: number;
   name: string;
   email: string;
-  role: string;
+  role: number;
+};
+
+type Role = {
+  id: number;
+  name: string;
 };
 
 export const useUsers = () => {
@@ -15,6 +20,16 @@ export const useUsers = () => {
   const error = ref<string | null>(null);
   const storage = useStorage();
   const config = useRuntimeConfig();
+  const roles = ref<Role[]>([
+    {
+      id: 0,
+      name: "Admin",
+    },
+    {
+      id: 1,
+      name: "Cashier",
+    },
+  ]);
 
   const fetchUsers = async () => {
     isLoading.value = true;
@@ -61,6 +76,7 @@ export const useUsers = () => {
 
   return {
     users,
+    roles,
     isLoading,
     error,
     fetchUsers,

@@ -18,6 +18,24 @@ import {
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import {
+  Select,
+  SelectContent,
+  SelectGroup,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import {
+  Pagination,
+  PaginationEllipsis,
+  PaginationFirst,
+  PaginationLast,
+  PaginationContent,
+  PaginationItem,
+  PaginationNext,
+  PaginationPrevious,
+} from "@/components/ui/pagination";
 import { toast } from "vue-sonner";
 import { RefreshCcw, Plus } from "lucide-vue-next";
 import { useUsers } from "@/composables/useUsers";
@@ -26,10 +44,10 @@ interface User {
   id: number;
   name: string;
   email: string;
-  role: string;
+  role: number;
 }
 
-const { users, isLoading, error, fetchUsers } = useUsers();
+const { users, roles, isLoading, fetchUsers } = useUsers();
 
 onMounted(() => {
   nextTick(async () => {
@@ -44,7 +62,7 @@ const editingId = ref<number | null>(null);
 const form = reactive({
   name: "",
   email: "",
-  role: "",
+  role: 0,
 });
 
 const openAddModal = () => {
@@ -54,10 +72,12 @@ const openAddModal = () => {
   isModalOpen.value = true;
 };
 
-const editCategory = (user: User) => {
+const editUser = (user: User) => {
   isEditing.value = true;
   editingId.value = user.id;
   form.name = user.name;
+  form.email = user.email;
+  form.role = user.role;
   isModalOpen.value = true;
 };
 
@@ -68,6 +88,8 @@ const closeModal = () => {
 
 const resetForm = () => {
   form.name = "";
+  form.email = "";
+  form.role = 0;
 };
 
 const handleSubmit = () => {
@@ -81,8 +103,8 @@ const handleSubmit = () => {
       users.value[index] = {
         id: editingId.value!,
         name: form.name,
-        email: "",
-        role: "",
+        email: form.email,
+        role: form.role,
       };
     }
     toast.success("User updated successfully");
@@ -91,15 +113,15 @@ const handleSubmit = () => {
     users.value.push({
       id: Date.now(),
       name: form.name,
-      email: "",
-      role: "",
+      email: form.email,
+      role: form.role,
     });
     toast.success("User added successfully");
   }
   closeModal();
 };
 
-const deleteCategory = (id: number) => {
+const deleteUser = (id: number) => {
   // Here you would typically make an API call to delete the user
   users.value = users.value.filter((s) => s.id !== id);
   toast.success("User deleted successfully");
@@ -152,20 +174,18 @@ definePageMeta({
               <TableRow v-for="user in users" :key="user.id">
                 <TableCell>{{ user.name }}</TableCell>
                 <TableCell>{{ user.email }}</TableCell>
-                <TableCell>{{ user.role }}</TableCell>
+                <TableCell>{{
+                  roles.find((r) => r.id === user.role)?.name
+                }}</TableCell>
                 <TableCell>
                   <div class="flex gap-2" v-if="user.id !== 0">
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      @click="editCategory(user)"
-                    >
+                    <Button variant="outline" size="sm" @click="editUser(user)">
                       Edit
                     </Button>
                     <Button
                       variant="destructive"
                       size="sm"
-                      @click="deleteCategory(user.id)"
+                      @click="deleteUser(user.id)"
                     >
                       Delete
                     </Button>
@@ -176,6 +196,39 @@ definePageMeta({
           </TableBody>
         </Table>
       </div>
+
+      <Pagination
+        v-slot="{ page }"
+        :items-per-page="10"
+        :total="100"
+        :sibling-count="1"
+        show-edges
+        :default-page="2"
+        class="mt-5"
+      >
+        <PaginationContent v-slot="{ items }" class="flex items-center gap-1">
+          <PaginationFirst />
+          <PaginationPrevious />
+          <template v-for="(item, index) in items">
+            <PaginationItem
+              v-if="item.type === 'page'"
+              :key="index"
+              :value="item.value"
+              as-child
+            >
+              <Button
+                class="w-10 h-10 p-0"
+                :variant="item.value === page ? 'default' : 'outline'"
+              >
+                {{ item.value }}
+              </Button>
+            </PaginationItem>
+            <PaginationEllipsis v-else :key="item.type" :index="index" />
+          </template>
+          <PaginationNext />
+          <PaginationLast />
+        </PaginationContent>
+      </Pagination>
     </div>
 
     <!-- Add/Edit Modal -->
@@ -183,13 +236,36 @@ definePageMeta({
       <DialogContent>
         <DialogHeader>
           <DialogTitle>{{
-            isEditing ? "Edit Category" : "Add Category"
+            isEditing ? "Edit Employee" : "Add Employee"
           }}</DialogTitle>
         </DialogHeader>
         <form @submit.prevent="handleSubmit" class="space-y-4">
           <div class="space-y-2">
-            <Label for="name">Category Name</Label>
+            <Label for="name">Name</Label>
             <Input id="name" v-model="form.name" required />
+          </div>
+          <div class="space-y-2">
+            <Label for="email">Email</Label>
+            <Input id="email" type="email" v-model="form.email" required />
+          </div>
+          <div class="space-y-2">
+            <Label for="name">Role</Label>
+            <Select v-model="form.role">
+              <SelectTrigger class="w-full">
+                <SelectValue placeholder="Select a role" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectGroup>
+                  <SelectLabel>Role</SelectLabel>
+                  <SelectItem
+                    v-for="role in roles"
+                    :key="role.id"
+                    :value="role.id"
+                    >{{ role.name }}</SelectItem
+                  >
+                </SelectGroup>
+              </SelectContent>
+            </Select>
           </div>
           <DialogFooter>
             <Button type="button" variant="outline" @click="closeModal"
