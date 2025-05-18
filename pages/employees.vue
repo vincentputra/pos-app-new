@@ -95,12 +95,14 @@ const form = reactive({
 
 const openAddModal = () => {
   isEditing.value = false;
+  isDelete.value = false;
   editingId.value = null;
   resetForm();
   isModalOpen.value = true;
 };
 
 const openDeleteModal = (id: number) => {
+  isEditing.value = false;
   isDelete.value = true;
   editingId.value = id;
   isModalOpen.value = true;
@@ -108,6 +110,7 @@ const openDeleteModal = (id: number) => {
 
 const openEditModal = (user: User) => {
   isEditing.value = true;
+  isDelete.value = false;
   editingId.value = user.id;
   form.name = user.name;
   form.email = user.email;
