@@ -27,7 +27,7 @@ import { useAuth } from "@/composables/useAuth";
 import { toast } from "vue-sonner";
 
 const route = useRoute();
-const { logout } = useAuth();
+const { user, logout } = useAuth();
 const isLoading = ref(false);
 const errorMessage = ref("");
 const hasError = ref(false);
@@ -38,6 +38,59 @@ type Page = {
   isActive: boolean;
   items: { name: string; path: string; isActive: boolean }[];
 };
+
+const adminRoutes = [
+  {
+    name: "Reports",
+    path: "/",
+    isActive: false,
+    items: [
+      {
+        name: "Sales",
+        path: "/sales-report",
+        isActive: false,
+      },
+      {
+        name: "Transactions",
+        path: "/transactions-report",
+        isActive: false,
+      },
+      {
+        name: "Shifts",
+        path: "/shifts-report",
+        isActive: false,
+      },
+    ],
+  },
+  {
+    name: "Inventory",
+    path: "/",
+    isActive: false,
+    items: [
+      {
+        name: "Product",
+        path: "/product-invetory",
+        isActive: false,
+      },
+      {
+        name: "Summary",
+        path: "/inventory-summary",
+        isActive: false,
+      },
+      {
+        name: "Adjustment",
+        path: "/inventory-adjustment",
+        isActive: false,
+      },
+    ],
+  },
+  {
+    name: "Employees",
+    path: "/employees",
+    isActive: false,
+    items: [],
+  },
+];
 
 const pages = ref<Page[]>([
   {
@@ -52,61 +105,28 @@ const pages = ref<Page[]>([
     isActive: true,
     items: [],
   },
-  {
-    name: "Reports",
-    path: "/",
-    isActive: false,
-    items: [
-      {
-        name: "Sales",
-        path: "/sales",
-        isActive: false,
-      },
-      {
-        name: "Transactions",
-        path: "/report-transactions",
-        isActive: false,
-      },
-      {
-        name: "Invoices",
-        path: "/invoices",
-        isActive: false,
-      },
-      {
-        name: "Shifts",
-        path: "/shifts",
-        isActive: false,
-      },
-    ],
-  },
-  {
-    name: "Inventory",
-    path: "/",
-    isActive: false,
-    items: [
-      {
-        name: "Product",
-        path: "/product",
-        isActive: false,
-      },
-      {
-        name: "Summary",
-        path: "/summary",
-        isActive: false,
-      },
-      {
-        name: "Adjustment",
-        path: "/adjustment",
-        isActive: false,
-      },
-    ],
-  },
-  {
-    name: "Employees",
-    path: "/employees",
-    isActive: false,
-    items: [],
-  },
+  ...(user.value?.role === 0
+    ? adminRoutes
+    : [
+        {
+          name: "Receipts",
+          path: "/receipts",
+          isActive: true,
+          items: [],
+        },
+        {
+          name: "Shift",
+          path: "/shift",
+          isActive: true,
+          items: [],
+        },
+        {
+          name: "Product",
+          path: "/product",
+          isActive: true,
+          items: [],
+        },
+      ]),
 ]);
 
 const handleLogout = async () => {

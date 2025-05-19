@@ -5,7 +5,7 @@ import { useAuth } from "@/composables/useAuth";
 export default defineNuxtRouteMiddleware(async (to, from) => {
   if (import.meta.server) return;
   //const { addRoute } = useHistory();
-  const { isAuthenticated, initAuth } = await useAuth();
+  const { user, isAuthenticated, initAuth } = await useAuth();
 
   // Don't track login page in history
   //if (from.path !== '/login' && to.path !== '/') {
@@ -15,6 +15,25 @@ export default defineNuxtRouteMiddleware(async (to, from) => {
 
   // Initialize auth state
   await initAuth();
+
+  const adminRoutes = [
+    "/sales-report",
+    "/transactions-report",
+    "/shifts-report",
+    "/product-invetory",
+    "/inventory-summary",
+    "/inventory-adjustment",
+    "/employees",
+  ];
+
+  if (user.value?.role === 1 && adminRoutes.includes(to.path)) {
+    return abortNavigation(
+      showError({
+        statusCode: 404,
+        statusMessage: "Page Not Found",
+      })
+    );
+  }
 
   if (!isAuthenticated.value && to.path !== "/login") {
     abortNavigation();

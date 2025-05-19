@@ -4,9 +4,10 @@ import { defineStore } from "pinia";
 type CartItem = {
   id: number;
   name: string;
-  image: string;
   description: string;
   price: number;
+  image: string;
+  category: string;
   quantity: number;
 };
 
