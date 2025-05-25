@@ -1,10 +1,6 @@
 <script setup lang="ts">
+import { ref } from "vue";
 import { Button } from "@/components/ui/button";
-import { Minus, Plus, Printer, Loader2 } from "lucide-vue-next";
-import { useCartStore } from "@/stores/useCartStore";
-import { useTransactionMutation } from "@/composables/useTransactionMutation";
-import { useStorage } from "@/composables/useStorage";
-import { toast } from "vue-sonner";
 import {
   Dialog,
   DialogContent,
@@ -13,9 +9,16 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
+import { Minus, Plus, Printer, Loader2 } from "lucide-vue-next";
+import { useCartStore } from "@/stores/useCartStore";
+import { usePrice } from "@/composables/usePrice";
+import { useTransactionMutation } from "@/composables/useTransactionMutation";
+import { useStorage } from "@/composables/useStorage";
+import { toast } from "vue-sonner";
 
 const storage = useStorage();
 const cartStore = useCartStore();
+const { formatPrice } = usePrice();
 const { createTransaction } = useTransactionMutation();
 
 const showPaymentDialog = ref(false);
@@ -46,11 +49,6 @@ const decrementQuantity = (item: any) => {
   cartStore.updateQuantity(item.id, item.quantity - 1);
 };
 
-const formatPrice = (price: number | string): string => {
-  const numericPrice = typeof price === "string" ? parseFloat(price) : price;
-  return !isNaN(numericPrice) ? numericPrice.toFixed(2) : "0.00";
-};
-
 const calculateChange = () => {
   if (!amountPaid.value) {
     change.value = 0;
@@ -62,19 +60,11 @@ const calculateChange = () => {
 const handlePrintBill = async () => {
   if (cartItems.value.length === 0) return;
   if (!amountPaid.value || amountPaid.value < total.value) {
-    toast({
-      title: "Error",
-      description: "Please input the correct amount paid.",
-      variant: "destructive",
-    });
+    toast.error("Please input the correct amount paid.");
     return;
   }
   if (!selectedPaymentMethod.value) {
-    toast({
-      title: "Error",
-      description: "Please select a payment method.",
-      variant: "destructive",
-    });
+    toast.error("Please select a payment method.");
     return;
   }
 
@@ -104,21 +94,12 @@ const handlePrintBill = async () => {
 
     await createTransaction(payload);
     cartStore.reset();
-    toast({
-      title: "Success",
-      description: "Bill has been printed and transaction recorded",
-      variant: "success",
-    });
+    toast.success("Bill has been printed and transaction recorded");
   } catch (error) {
     console.error("Transaction failed:", error);
-    toast({
-      title: "Error",
-      description:
-        error instanceof Error
-          ? error.message
-          : "Failed to process transaction",
-      variant: "destructive",
-    });
+    toast.error(
+      error instanceof Error ? error.message : "Failed to process transaction"
+    );
   } finally {
     isProcessing.value = false;
   }
@@ -127,7 +108,7 @@ const handlePrintBill = async () => {
 
 <template>
   <aside
-    class="flex h-full w-2/4 flex-col overflow-hidden border-l border-gray-200 bg-white lg:w-2/5 xl:w-1/4"
+    class="flex h-full w-2/4 flex-col overflow-hidden border-l border-gray-200 lg:w-2/5 xl:w-1/4"
   >
     <div class="flex-shrink-0 border-b border-gray-200 p-4">
       <h2 class="text-lg font-semibold text-gray-800">Shopping Cart</h2>
@@ -148,7 +129,7 @@ const handlePrintBill = async () => {
             <div>
               <h3 class="font-medium text-gray-800">{{ item.name }}</h3>
               <p class="text-sm text-gray-600">
-                ${{ formatPrice(item.price) }}
+                {{ formatPrice(item.price) }}
               </p>
             </div>
           </div>
@@ -177,7 +158,7 @@ const handlePrintBill = async () => {
       <div class="space-y-2">
         <div class="flex justify-between text-gray-600">
           <span>Subtotal</span>
-          <span>${{ formatPrice(subtotal) }}</span>
+          <span>{{ formatPrice(subtotal) }}</span>
         </div>
         <div class="flex items-center justify-between text-gray-600">
           <span>Discount</span>
@@ -194,11 +175,11 @@ const handlePrintBill = async () => {
         </div>
         <div class="flex justify-between text-gray-600">
           <span>Tax</span>
-          <span>${{ formatPrice(tax) }}</span>
+          <span>{{ formatPrice(tax) }}</span>
         </div>
         <div class="flex justify-between font-bold text-gray-900">
           <span>Total</span>
-          <span>${{ formatPrice(total) }}</span>
+          <span>{{ formatPrice(total) }}</span>
         </div>
       </div>
 
@@ -247,7 +228,7 @@ const handlePrintBill = async () => {
                 class="font-medium"
                 :class="change >= 0 ? 'text-green-600' : 'text-red-600'"
               >
-                ${{ formatPrice(change) }}
+                {{ formatPrice(change) }}
               </span>
             </div>
 

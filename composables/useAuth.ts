@@ -56,7 +56,6 @@ export const useAuth = () => {
   const initAuth = async () => {
     const token = await getToken();
     const storedUser = storage.getItem("user");
-    //console.log("initAuth", token, storedUser, isAuthenticated.value);
 
     isAuthenticated.value = !!token;
 

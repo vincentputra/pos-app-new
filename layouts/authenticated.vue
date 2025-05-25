@@ -27,7 +27,7 @@ import { useAuth } from "@/composables/useAuth";
 import { toast } from "vue-sonner";
 
 const route = useRoute();
-const { user, logout } = useAuth();
+const { user, initAuth, logout } = useAuth();
 const isLoading = ref(false);
 const errorMessage = ref("");
 const hasError = ref(false);
@@ -69,7 +69,7 @@ const adminRoutes = [
     items: [
       {
         name: "Product",
-        path: "/product-invetory",
+        path: "/product-inventory",
         isActive: false,
       },
       {
@@ -92,6 +92,37 @@ const adminRoutes = [
   },
 ];
 
+const cashierRoutes = [
+  {
+    name: "Point Of Sale",
+    path: "/",
+    isActive: false,
+    items: [
+      {
+        name: "Order",
+        path: "/pos",
+        isActive: false,
+      },
+      {
+        name: "Receipts",
+        path: "/receipts",
+        isActive: false,
+      },
+      {
+        name: "Shift",
+        path: "/shift",
+        isActive: false,
+      },
+    ],
+  },
+  {
+    name: "Product Adjustment",
+    path: "/create-adjustment",
+    isActive: false,
+    items: [],
+  },
+];
+
 const pages = ref<Page[]>([
   {
     name: "Dashboard",
@@ -99,34 +130,6 @@ const pages = ref<Page[]>([
     isActive: true,
     items: [],
   },
-  {
-    name: "Point of Sale",
-    path: "/pos",
-    isActive: true,
-    items: [],
-  },
-  ...(user.value?.role === 0
-    ? adminRoutes
-    : [
-        {
-          name: "Receipts",
-          path: "/receipts",
-          isActive: true,
-          items: [],
-        },
-        {
-          name: "Shift",
-          path: "/shift",
-          isActive: true,
-          items: [],
-        },
-        {
-          name: "Product",
-          path: "/product",
-          isActive: true,
-          items: [],
-        },
-      ]),
 ]);
 
 const handleLogout = async () => {
@@ -152,16 +155,31 @@ watch(
   (newPath) => {
     pages.value = pages.value.map((page) => ({
       ...page,
-      isActive: page.path === newPath,
+      isActive:
+        page.path === newPath ||
+        page.items.some((item) => item.path === newPath),
+      items: page.items.map((item) => ({
+        ...item,
+        isActive: item.path === newPath,
+      })),
     }));
   },
   { immediate: true }
 );
+
+onMounted(async () => {
+  await initAuth();
+  if (user.value?.role == 0) {
+    pages.value = [...pages.value, ...adminRoutes];
+  } else {
+    pages.value = [...pages.value, ...cashierRoutes];
+  }
+});
 </script>
 
 <template>
   <SidebarProvider>
-    <Sidebar>
+    <Sidebar collapsible="offcanvas">
       <SidebarHeader>
         <SidebarMenu>
           <SidebarMenuItem>
@@ -207,7 +225,9 @@ watch(
                         as-child
                         :is-active="childItem.isActive"
                       >
-                        <a :href="childItem.path">{{ childItem.name }}</a>
+                        <NuxtLink :to="childItem.path" class="w-full">
+                          {{ childItem.name }}
+                        </NuxtLink>
                       </SidebarMenuSubButton>
                     </SidebarMenuSubItem>
                   </SidebarMenuSub>
@@ -245,9 +265,7 @@ watch(
       >
         <SidebarTrigger class="-ml-1" />
       </header>
-      <div class="flex min-h-0 flex-1">
-        <slot />
-      </div>
+      <slot />
     </SidebarInset>
   </SidebarProvider>
 </template>

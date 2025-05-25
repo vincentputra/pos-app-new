@@ -5,7 +5,7 @@ import { useAuth } from "@/composables/useAuth";
 export default defineNuxtRouteMiddleware(async (to, from) => {
   if (import.meta.server) return;
   //const { addRoute } = useHistory();
-  const { user, isAuthenticated, initAuth } = await useAuth();
+  const { user, isAuthenticated, initAuth } = useAuth();
 
   // Don't track login page in history
   //if (from.path !== '/login' && to.path !== '/') {
@@ -20,7 +20,7 @@ export default defineNuxtRouteMiddleware(async (to, from) => {
     "/sales-report",
     "/transactions-report",
     "/shifts-report",
-    "/product-invetory",
+    "/product-inventory",
     "/inventory-summary",
     "/inventory-adjustment",
     "/employees",

@@ -23,6 +23,7 @@ type Page = {
 
 export const useUsers = () => {
   const users = ref<User[]>([]);
+  const usersByRole = ref<User[]>([]);
   const pageUser = ref<{
     current_page: number;
     last_page: number;
@@ -79,8 +80,6 @@ export const useUsers = () => {
             Authorization: `Bearer ${tokenData.value}`,
             Accept: "application/json",
           },
-          lazy: true,
-          server: false,
         }
       );
 
@@ -196,15 +195,18 @@ export const useUsers = () => {
   const deleteUser = async (payload: any) => {
     isLoading.value = true;
     error.value = null;
+
     try {
       const storedToken = storage.getItem("auth_token");
       if (!storedToken) throw new Error("No auth token found");
+
       let tokenData: { value: string; expiresAt: number };
       try {
         tokenData = JSON.parse(storedToken);
       } catch {
         throw new Error("Invalid token format");
       }
+
       const { data, error } = await useFetch(
         `${config.public.apiBase}/users/${payload.id}`,
         {
@@ -216,12 +218,15 @@ export const useUsers = () => {
           },
         }
       );
+
       if (error.value) {
         throw new Error(error.value.data.message || "Failed to delete user");
       }
+
       if (!data.value) {
         throw new Error("No response data received");
       }
+
       return data.value;
     } catch (e) {
       error.value = e instanceof Error ? e.message : "Failed to delete user";
@@ -232,9 +237,55 @@ export const useUsers = () => {
     }
   };
 
+  const fetchUsersByRole = async (role: number) => {
+    isLoading.value = true;
+    error.value = null;
+
+    try {
+      const storedToken = storage.getItem("auth_token");
+      if (!storedToken) throw new Error("No auth token found");
+
+      let tokenData: { value: string; expiresAt: number };
+      try {
+        tokenData = JSON.parse(storedToken);
+      } catch {
+        throw new Error("Invalid token format");
+      }
+
+      const { data, error } = await useFetch<{
+        data: User[];
+      }>(`${config.public.apiBase}/users/role/${role}`, {
+        headers: {
+          Authorization: `Bearer ${tokenData.value}`,
+          Accept: "application/json",
+        },
+      });
+
+      if (error.value) {
+        throw new Error(
+          error.value.data.message || "Failed to fetch users by role"
+        );
+      }
+
+      if (!data.value) {
+        throw new Error("No data received from API");
+      }
+
+      usersByRole.value = data.value.data;
+    } catch (e) {
+      error.value =
+        e instanceof Error ? e.message : "Failed to fetch users by role";
+      throw new Error(error.value);
+      //console.error("Error fetching users by role:", e);
+    } finally {
+      isLoading.value = false;
+    }
+  };
+
   return {
     users,
     pageUser,
+    usersByRole,
     roles,
     isLoading,
     error,
@@ -242,5 +293,6 @@ export const useUsers = () => {
     createUser,
     updateUser,
     deleteUser,
+    fetchUsersByRole,
   };
 };

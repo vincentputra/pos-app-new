@@ -34,13 +34,6 @@ const handleLogin = async () => {
   }
 };
 
-// Use watchEffect for navigation after auth state changes
-/* watchEffect(() => {
-  if (isAuthenticated.value) {
-    return navigateTo("/");
-  }
-}); */
-
 definePageMeta({
   layout: "default",
   middleware: ["auth"],
