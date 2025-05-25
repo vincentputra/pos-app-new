@@ -70,6 +70,7 @@ type Page = {
   stock_id?: number;
   type?: number;
   search?: string;
+  stock?: number;
 };
 
 export const useProducts = () => {
@@ -147,6 +148,13 @@ export const useProducts = () => {
         payload.search !== ""
       ) {
         parameter = parameter + `&search=${payload.search}`;
+      }
+      if (
+        payload.stock !== undefined &&
+        payload.stock !== null &&
+        Number(payload.stock) !== 0
+      ) {
+        parameter = parameter + `&stock=${payload.user_id}`;
       }
       const { data, error } = await useFetch<{
         data: Product[];

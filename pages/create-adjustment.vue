@@ -31,6 +31,7 @@ import {
 import {
   Dialog,
   DialogContent,
+  DialogScrollContent,
   DialogFooter,
   DialogDescription,
   DialogHeader,
@@ -75,7 +76,7 @@ interface Adjustment {
 }
 
 const currentPage = ref(1);
-const itemsPerPage = ref(15);
+const itemsPerPage = ref(10);
 const selectedUser = ref(0);
 const search = ref("");
 const isModalOpen = ref(false);
@@ -195,7 +196,7 @@ definePageMeta({
           Add Product
         </Button>
       </div>
-      <Card class="mx-auto w-full max-w-3xl">
+      <Card class="mx-auto w-full max-w-3xl overflow-y-auto">
         <form @submit.prevent="handleAdjustmentSubmit">
           <CardContent>
             <div class="grid items-center w-full gap-4 mb-4">
@@ -294,17 +295,17 @@ definePageMeta({
     </div>
 
     <Dialog :open="isModalOpen" @update:open="isModalOpen = false">
-      <DialogContent class="sm:max-w-[600px] overflow-auto">
+      <DialogScrollContent class="sm:max-w-[600px]">
         <DialogHeader>
           <DialogTitle>Add Product</DialogTitle>
           <DialogDescription class="font-medium text-gray-800">
             Add product to adjustment table
           </DialogDescription>
         </DialogHeader>
-        <div class="mb-4 flex items-center gap-4">
+        <div class="mt-4 mb-4 flex items-center gap-4">
           <FilterBySearch @search-filter="filterBySearch" />
         </div>
-        <div class="rounded-lg border shadow-sm">
+        <div class="w-full rounded-lg border shadow-sm overflow-x-scroll">
           <Table>
             <TableHeader>
               <TableRow>
@@ -399,7 +400,7 @@ definePageMeta({
             >Close</Button
           >
         </DialogFooter>
-      </DialogContent>
+      </DialogScrollContent>
     </Dialog>
   </div>
 </template>

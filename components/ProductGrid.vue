@@ -36,6 +36,7 @@ const handlePageChange = async (page: number) => {
     status: 0,
     user_id: selectedUser.value,
     search: search.value,
+    stock: 1,
   });
 };
 
@@ -66,9 +67,9 @@ const addToCart = (product: any) => {
     </div>
     <div class="flex-1">
       <div
-        class="grid grid-cols-1 gap-4 lg:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4"
+        class="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-4 2xl:grid-cols-4"
       >
-        <template v-if="isLoading">
+        <template v-if="isLoading || products.length == 0">
           <ProductCardSkeleton v-for="n in 8" :key="n" />
         </template>
 
@@ -83,11 +84,13 @@ const addToCart = (product: any) => {
               :alt="product.name"
               class="mb-4 aspect-square w-full rounded-lg object-cover"
             />
-            <div class="flex flex-1 flex-col">
-              <h3 class="font-medium text-gray-800">{{ product.name }}</h3>
-              <p class="mb-3 text-sm text-gray-600">
-                {{ product.description }}
-              </p>
+            <div class="flex flex-1 flex-col justify-end">
+              <div class="grow">
+                <h3 class="font-medium text-gray-800">{{ product.name }}</h3>
+                <p class="mb-3 text-sm text-gray-600">
+                  {{ product.description }}
+                </p>
+              </div>
               <span
                 class="font-bold text-gray-900 lg:grid-cols-2 wrap-anywhere mb-4"
                 >{{ formatPrice(product.price) }}</span

@@ -114,7 +114,7 @@ const handlePrintBill = async () => {
       <h2 class="text-lg font-semibold text-gray-800">Shopping Cart</h2>
     </div>
 
-    <div class="flex-1 overflow-auto p-4">
+    <div class="flex-1 overflow-auto">
       <div v-if="cartItems.length === 0" class="mt-8 text-center text-gray-500">
         Cart is empty
       </div>
@@ -123,17 +123,15 @@ const handlePrintBill = async () => {
         <div
           v-for="item in cartItems"
           :key="item.id"
-          class="flex items-center justify-between"
+          class="sm:flex justify-between gap-2 border-b-1 p-4"
         >
-          <div class="flex flex-wrap items-center space-x-3">
-            <div>
-              <h3 class="font-medium text-gray-800">{{ item.name }}</h3>
-              <p class="text-sm text-gray-600">
-                {{ formatPrice(item.price) }}
-              </p>
-            </div>
+          <div class="flex flex-col mb-4">
+            <h3 class="font-medium text-gray-800">{{ item.name }}</h3>
+            <p class="text-sm text-gray-600">
+              {{ formatPrice(item.price) }}
+            </p>
           </div>
-          <div class="flex items-center space-x-2">
+          <div class="flex items-center">
             <Button
               variant="outline"
               size="icon"

@@ -94,13 +94,11 @@ definePageMeta({
         </div>
       </div>
     </div>
-    <div class="hidden bg-muted lg:block">
+    <div class="hidden h-screen bg-muted lg:block">
       <img
-        src="/assets/images/placeholder.svg"
+        src="/assets/images/kopi.jpeg"
         alt="Image"
-        width="1920"
-        height="1080"
-        class="h-full w-full object-cover dark:brightness-[0.2] dark:grayscale"
+        class="h-full w-screen object-contain md:object-cover dark:brightness-[0.2] dark:grayscale"
       />
     </div>
   </div>
