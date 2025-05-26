@@ -22,7 +22,7 @@ import {
 } from "lucide-vue-next";
 
 import { useRoute } from "vue-router";
-import { watch, ref } from "vue";
+import { watch, onMounted, nextTick, ref } from "vue";
 import { useAuth } from "@/composables/useAuth";
 import { toast } from "vue-sonner";
 
@@ -150,19 +150,22 @@ const handleLogout = async () => {
   }
 };
 
+const updateActivePage = (newPath: any) => {
+  pages.value = pages.value.map((page) => ({
+    ...page,
+    isActive:
+      page.path === newPath || page.items.some((item) => item.path === newPath),
+    items: page.items.map((item) => ({
+      ...item,
+      isActive: item.path === newPath,
+    })),
+  }));
+};
+
 watch(
   () => route.path,
   (newPath) => {
-    pages.value = pages.value.map((page) => ({
-      ...page,
-      isActive:
-        page.path === newPath ||
-        page.items.some((item) => item.path === newPath),
-      items: page.items.map((item) => ({
-        ...item,
-        isActive: item.path === newPath,
-      })),
-    }));
+    updateActivePage(newPath);
   },
   { immediate: true }
 );
@@ -174,6 +177,7 @@ onMounted(async () => {
   } else {
     pages.value = [...pages.value, ...cashierRoutes];
   }
+  updateActivePage(route.path);
 });
 </script>
 

@@ -11,14 +11,14 @@ import {
 import { useUsers } from "@/composables/useUsers";
 
 const { roles } = useUsers();
-const selectedRole = ref(2);
+const selectedRole = ref("2");
 
 const emit = defineEmits<{
-  (e: "role-change", user: number): void;
+  (e: "role-change", role: number): void;
 }>();
 
 watch(selectedRole, (newValue) => {
-  emit("role-change", newValue);
+  emit("role-change", Number(newValue));
 });
 </script>
 

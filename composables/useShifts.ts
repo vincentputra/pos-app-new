@@ -64,6 +64,8 @@ type TypeCash = {
 type Page = {
   page: number;
   per_page: number;
+  user_id?: number;
+  date_range?: any;
 };
 
 export const useShifts = () => {
@@ -275,6 +277,23 @@ export const useShifts = () => {
         throw new Error("Invalid token format");
       }
 
+      let parameter = `page=${payload.page}&per_page=${payload.per_page}`;
+      if (
+        payload.user_id !== undefined &&
+        payload.user_id !== null &&
+        Number(payload.user_id) !== 0
+      ) {
+        parameter = parameter + `&user_id=${payload.user_id}`;
+      }
+      if (
+        payload.date_range !== undefined &&
+        payload.date_range !== null &&
+        payload.date_range !== ""
+      ) {
+        parameter =
+          parameter +
+          `&date_from=${payload.date_range.start.toString()}&date_to=${payload.date_range.end.toString()}`;
+      }
       const { data, error } = await useFetch<{
         data: Shift[];
         meta: {
@@ -283,15 +302,12 @@ export const useShifts = () => {
           per_page: number;
           total: number;
         };
-      }>(
-        `${config.public.apiBase}/shifts?page=${payload.page}&per_page=${payload.per_page}`,
-        {
-          headers: {
-            Authorization: `Bearer ${tokenData.value}`,
-            Accept: "application/json",
-          },
-        }
-      );
+      }>(`${config.public.apiBase}/shifts?${parameter}`, {
+        headers: {
+          Authorization: `Bearer ${tokenData.value}`,
+          Accept: "application/json",
+        },
+      });
 
       if (error.value) {
         throw new Error(error.value.data.message || "Failed to fetch shifts");
@@ -445,7 +461,7 @@ export const useShifts = () => {
         throw new Error("No response data received");
       }
 
-      isTheShiftOpen.value = true;
+      return data.value;
     } catch (e) {
       error.value =
         e instanceof Error ? e.message : "Failed to create cash report";

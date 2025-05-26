@@ -21,10 +21,32 @@ const df = new DateFormatter("en-US", {
   dateStyle: "medium",
 });
 
+const date = new Date();
+const now = new CalendarDate(
+  date.getFullYear(),
+  date.getMonth() + 1,
+  date.getDate()
+);
 const value = ref({
+  start: now.subtract({ weeks: 1 }),
+  end: now,
+}) as Ref<DateRange>;
+
+const emit = defineEmits<{
+  (e: "date-change", date: any): void;
+}>();
+
+watch(
+  value,
+  (newValue) => {
+    emit("date-change", newValue);
+  },
+  { deep: true }
+);
+/* const value = ref({
   start: new CalendarDate(2022, 1, 20),
   end: new CalendarDate(2022, 1, 20).add({ days: 20 }),
-}) as Ref<DateRange>;
+}) as Ref<DateRange>; */
 </script>
 
 <template>

@@ -1,5 +1,8 @@
 <script setup lang="ts">
 import { ref, reactive, onMounted, nextTick } from "vue";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
+import { Button } from "@/components/ui/button";
 import {
   Table,
   TableBody,
@@ -8,8 +11,23 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { toast } from "vue-sonner";
+import {
+  Dialog,
+  DialogContent,
+  DialogFooter,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import {
+  NumberField,
+  NumberFieldContent,
+  NumberFieldDecrement,
+  NumberFieldIncrement,
+  NumberFieldInput,
+} from "@/components/ui/number-field";
 import { BookPlus } from "lucide-vue-next";
+import { toast } from "vue-sonner";
 import { useShifts } from "@/composables/useShifts";
 import { usePrice } from "@/composables/usePrice";
 import { useDate } from "@/composables/useDate";
@@ -54,7 +72,7 @@ const resetForm = () => {
 };
 
 const handleSubmitCash = async (type: number) => {
-  await createShiftHistory({
+  const response = await createShiftHistory({
     description: form.desc,
     amount: form.amount,
     type: type,
@@ -64,6 +82,15 @@ const handleSubmitCash = async (type: number) => {
     toast.error(error.value ?? "Something went wrong");
     return;
   }
+
+  shiftHistories.value.push({
+    id: (response as any).id ?? Date.now(),
+    shift_id: (response as any).user_id ?? shiftUser.value?.user_id,
+    type: (response as any).type ?? type,
+    description: (response as any).description ?? form.desc,
+    amount: (response as any).amount ?? form.amount,
+    created_at: (response as any).created_at ?? Date.now(),
+  });
 
   if (type === 0) {
     toast.success("Pay-in added successfully");
@@ -92,7 +119,7 @@ definePageMeta({
         </div>
       </div>
     </header>
-    <div class="custom-scrollbar min-h-0 flex-1 p-4">
+    <div class="min-h-0 flex-1 p-4">
       <div class="rounded-lg border shadow-sm">
         <Table>
           <TableHeader>
@@ -152,7 +179,7 @@ definePageMeta({
         </div>
         <div class="space-y-2">
           <Label for="desc">Description</Label>
-          <Input id="desc" v-model="form.desc" required />
+          <Textarea id="desc" v-model="form.desc" required />
         </div>
         <DialogFooter class="sm:justify-between">
           <Button type="button" variant="ghost" @click="closeModal"

@@ -11,14 +11,14 @@ import {
 import { useUsers } from "@/composables/useUsers";
 
 const { usersByRole, fetchUsersByRole } = useUsers();
-const selectedUser = ref(0);
+const selectedUser = ref("0");
 
 const emit = defineEmits<{
   (e: "user-change", user: number): void;
 }>();
 
 watch(selectedUser, (newValue) => {
-  emit("user-change", newValue);
+  emit("user-change", Number(newValue));
 });
 
 onMounted(async () => {

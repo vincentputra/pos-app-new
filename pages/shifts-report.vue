@@ -40,10 +40,12 @@ const {
   fetchShiftDetail,
 } = useShifts();
 const { formatPrice } = usePrice();
-const { formatDateTime } = useDate();
+const { dateRange, formatDateTime } = useDate();
 
 const currentPage = ref(1);
 const itemsPerPage = ref(15);
+const selectedUser = ref(0);
+const isModalOpen = ref(false);
 
 const cashReport = ref([
   {
@@ -103,6 +105,8 @@ const handlePageChange = async (page: number) => {
   await fetchShifts({
     page: currentPage.value,
     per_page: itemsPerPage.value,
+    user_id: selectedUser.value,
+    date_range: dateRange.value,
   });
 };
 
@@ -112,7 +116,15 @@ onMounted(() => {
   });
 });
 
-const isModalOpen = ref(false);
+const filterByUser = async (payload: any) => {
+  selectedUser.value = Number(payload);
+  await handlePageChange(1);
+};
+
+const filterByDate = async (payload: any) => {
+  dateRange.value = payload;
+  await handlePageChange(1);
+};
 
 const openDetailModal = async (id: number) => {
   await fetchShiftDetail({ id: id });
@@ -152,6 +164,8 @@ definePageMeta({
               fetchShifts({
                 page: currentPage,
                 per_page: itemsPerPage,
+                user_id: selectedUser,
+                date_range: dateRange,
               })
             "
           >
@@ -162,10 +176,10 @@ definePageMeta({
       </div>
     </header>
 
-    <div class="custom-scrollbar min-h-0 flex-1 p-4">
+    <div class="min-h-0 flex-1 p-4">
       <div class="mb-4 flex items-center gap-4">
-        <FilterByCashier />
-        <FilterByDate />
+        <FilterByCashier @user-change="filterByUser" />
+        <FilterByDate @date-change="filterByDate" />
       </div>
       <div class="rounded-lg border shadow-sm">
         <Table>
@@ -201,7 +215,7 @@ definePageMeta({
                 }}</TableCell>
                 <TableCell
                   :class="{
-                    'text-red-500':
+                    'text-red-600':
                       shift.final_cash_balance - shift.expected_cash_balance <
                       0,
                   }"
@@ -259,7 +273,7 @@ definePageMeta({
       </Pagination>
     </div>
 
-    <!-- Add/Edit Modal -->
+    <!-- Detail Modal -->
     <Dialog :open="isModalOpen" @update:open="isModalOpen = false">
       <DialogContent>
         <DialogHeader>

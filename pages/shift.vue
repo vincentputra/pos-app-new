@@ -150,7 +150,7 @@ definePageMeta({
           </div>
         </div>
       </header>
-      <div class="custom-scrollbar min-h-0 flex-1 p-4">
+      <div class="min-h-0 flex-1 p-4">
         <div class="space-y-1">
           <p class="text-lg font-medium mb-4">
             Open Shift at

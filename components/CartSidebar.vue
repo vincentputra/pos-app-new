@@ -12,14 +12,14 @@ import {
 import { Minus, Plus, Printer, Loader2 } from "lucide-vue-next";
 import { useCartStore } from "@/stores/useCartStore";
 import { usePrice } from "@/composables/usePrice";
-import { useTransactionMutation } from "@/composables/useTransactionMutation";
+import { useTransactions } from "@/composables/useTransactions";
 import { useStorage } from "@/composables/useStorage";
 import { toast } from "vue-sonner";
 
 const storage = useStorage();
 const cartStore = useCartStore();
 const { formatPrice } = usePrice();
-const { createTransaction } = useTransactionMutation();
+const { createTransaction } = useTransactions();
 
 const showPaymentDialog = ref(false);
 const discountAmount = ref(0);

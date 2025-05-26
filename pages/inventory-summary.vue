@@ -68,7 +68,7 @@ onMounted(() => {
 });
 
 const filterByUser = async (payload: any) => {
-  selectedUser.value = payload;
+  selectedUser.value = Number(payload);
   await handlePageChange(1);
 };
 
@@ -141,7 +141,7 @@ definePageMeta({
       </div>
     </header>
 
-    <div class="custom-scrollbar min-h-0 flex-1 p-4">
+    <div class="min-h-0 flex-1 p-4">
       <div class="mb-4 flex items-center gap-4">
         <FilterByCashier @user-change="filterByUser" />
         <FilterBySearch @search-filter="filterBySearch" />
@@ -172,9 +172,7 @@ definePageMeta({
                 <TableCell>{{ product.total_stock }}</TableCell>
                 <TableCell
                   :class="
-                    Number(product.total_stock) === 0
-                      ? 'text-red-600 font-semibold'
-                      : ''
+                    Number(product.total_stock) === 0 ? 'text-red-600' : ''
                   "
                 >
                   {{

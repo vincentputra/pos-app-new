@@ -99,7 +99,7 @@ const handlePageChange = async (page: number) => {
 };
 
 const filterByUser = async (payload: any) => {
-  selectedUser.value = payload;
+  selectedUser.value = Number(payload);
   await handlePageChange(1);
 };
 
@@ -331,9 +331,7 @@ definePageMeta({
                   <TableCell>{{ product.total_stock }}</TableCell>
                   <TableCell
                     :class="
-                      Number(product.total_stock) === 0
-                        ? 'text-red-600 font-semibold'
-                        : ''
+                      Number(product.total_stock) === 0 ? 'text-red-600' : ''
                     "
                   >
                     {{

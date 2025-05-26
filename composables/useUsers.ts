@@ -19,6 +19,8 @@ type Role = {
 type Page = {
   page: number;
   per_page: number;
+  search?: string;
+  role?: number;
 };
 
 export const useUsers = () => {
@@ -65,6 +67,21 @@ export const useUsers = () => {
         throw new Error("Invalid token format");
       }
 
+      let parameter = `page=${payload.page}&per_page=${payload.per_page}`;
+      if (
+        payload.role !== undefined &&
+        payload.role !== null &&
+        payload.role !== 2
+      ) {
+        parameter = parameter + `&role=${payload.role}`;
+      }
+      if (
+        payload.search !== undefined &&
+        payload.search !== null &&
+        payload.search !== ""
+      ) {
+        parameter = parameter + `&search=${payload.search}`;
+      }
       const { data, error } = await useFetch<{
         data: User[];
         meta: {
@@ -73,15 +90,12 @@ export const useUsers = () => {
           per_page: number;
           total: number;
         };
-      }>(
-        `${config.public.apiBase}/users?page=${payload.page}&per_page=${payload.per_page}`,
-        {
-          headers: {
-            Authorization: `Bearer ${tokenData.value}`,
-            Accept: "application/json",
-          },
-        }
-      );
+      }>(`${config.public.apiBase}/users?${parameter}`, {
+        headers: {
+          Authorization: `Bearer ${tokenData.value}`,
+          Accept: "application/json",
+        },
+      });
 
       if (error.value) {
         throw new Error(error.value.data.message || "Failed to fetch users");

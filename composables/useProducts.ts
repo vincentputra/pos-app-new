@@ -71,6 +71,7 @@ type Page = {
   type?: number;
   search?: string;
   stock?: number;
+  date_range?: any;
 };
 
 export const useProducts = () => {
@@ -363,6 +364,15 @@ export const useProducts = () => {
         Number(payload.stock_id) !== 0
       ) {
         parameter = parameter + `&stock_id=${payload.stock_id}`;
+      }
+      if (
+        payload.date_range !== undefined &&
+        payload.date_range !== null &&
+        payload.date_range !== ""
+      ) {
+        parameter =
+          parameter +
+          `&date_from=${payload.date_range.start.toString()}&date_to=${payload.date_range.end.toString()}`;
       }
       const { data, error } = await useFetch<{
         data: Adjustment[];

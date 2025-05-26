@@ -74,6 +74,8 @@ const handlePageChange = async (page: number) => {
   await fetchUsers({
     page: currentPage.value,
     per_page: itemsPerPage.value,
+    role: selectedRole.value,
+    search: search.value,
   });
 };
 
@@ -84,7 +86,7 @@ onMounted(() => {
 });
 
 const filterByRole = async (payload: any) => {
-  selectedRole.value = payload;
+  selectedRole.value = Number(payload);
   await handlePageChange(1);
 };
 
@@ -252,9 +254,9 @@ definePageMeta({
       </div>
     </header>
 
-    <div class="custom-scrollbar min-h-0 flex-1 p-4">
+    <div class="min-h-0 flex-1 p-4">
       <div class="mb-4 flex items-center gap-4">
-        <FilterByRole @user-change="filterByRole" />
+        <FilterByRole @role-change="filterByRole" />
         <FilterBySearch @search-filter="filterBySearch" />
       </div>
       <div class="rounded-lg border shadow-sm">
