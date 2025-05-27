@@ -34,6 +34,7 @@ type ShiftDetail = {
   gross_sales: number;
   refunds: number;
   discounts: number;
+  tax_sales: number;
   net_sales: number;
   final_cash_balance: number;
   created_at: string;

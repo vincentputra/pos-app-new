@@ -87,11 +87,15 @@ const salesSummary = ref([
     balance: 0,
   },
   {
-    title: "Refunds",
+    title: "Refund Sales",
     balance: 0,
   },
   {
-    title: "Discounts",
+    title: "Discount Sales",
+    balance: 0,
+  },
+  {
+    title: "Tax Sales",
     balance: 0,
   },
   {
@@ -140,7 +144,8 @@ const openDetailModal = async (id: number) => {
   salesSummary.value[0].balance = shiftDetail.value?.gross_sales ?? 0;
   salesSummary.value[1].balance = shiftDetail.value?.refunds ?? 0;
   salesSummary.value[2].balance = shiftDetail.value?.discounts ?? 0;
-  salesSummary.value[3].balance = shiftDetail.value?.net_sales ?? 0;
+  salesSummary.value[3].balance = shiftDetail.value?.tax_sales ?? 0;
+  salesSummary.value[4].balance = shiftDetail.value?.net_sales ?? 0;
   isModalOpen.value = true;
 };
 

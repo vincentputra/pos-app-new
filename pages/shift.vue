@@ -65,11 +65,15 @@ const salesSummary = ref([
     balance: 0,
   },
   {
-    title: "Refunds",
+    title: "Refund Sales",
     balance: 0,
   },
   {
-    title: "Discounts",
+    title: "Discount Sales",
+    balance: 0,
+  },
+  {
+    title: "Tax Sales",
     balance: 0,
   },
   {
@@ -91,7 +95,8 @@ onMounted(async () => {
     salesSummary.value[0].balance = shiftUser.value?.gross_sales ?? 0;
     salesSummary.value[1].balance = shiftUser.value?.refunds ?? 0;
     salesSummary.value[2].balance = shiftUser.value?.discounts ?? 0;
-    salesSummary.value[3].balance = shiftUser.value?.net_sales ?? 0;
+    salesSummary.value[3].balance = shiftUser.value?.tax_sales ?? 0;
+    salesSummary.value[4].balance = shiftUser.value?.net_sales ?? 0;
     form.amount = Number(shiftUser.value?.expected_cash_balance) ?? 0;
   });
 });
@@ -211,7 +216,7 @@ definePageMeta({
             <DialogDescription>
               Expected Cash Amount:
               <span class="ml-2 font-medium text-gray-800">
-                {{ formatPrice(cashReport[5].balance) }}
+                {{ formatPrice(cashReport[6].balance) }}
               </span>
             </DialogDescription>
           </DialogHeader>
