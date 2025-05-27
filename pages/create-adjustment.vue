@@ -78,6 +78,7 @@ interface Adjustment {
 const currentPage = ref(1);
 const itemsPerPage = ref(10);
 const selectedUser = ref(0);
+const selectedStockStatus = ref("all");
 const search = ref("");
 const isModalOpen = ref(false);
 const adjustmentTable = ref<Adjustment[]>([]);
@@ -93,6 +94,7 @@ const handlePageChange = async (page: number) => {
     page: currentPage.value,
     per_page: itemsPerPage.value,
     status: 0,
+    stock_status: selectedStockStatus.value,
     user_id: selectedUser.value,
     search: search.value,
   });
@@ -105,6 +107,11 @@ const filterByUser = async (payload: any) => {
 
 const filterBySearch = async (payload: any) => {
   search.value = payload;
+  await handlePageChange(1);
+};
+
+const filterByStockStatus = async (payload: any) => {
+  selectedStockStatus.value = payload;
   await handlePageChange(1);
 };
 
@@ -159,6 +166,14 @@ watch(
   selectedUser,
   (newValue) => {
     filterByUser(newValue);
+  },
+  { immediate: true }
+);
+
+watch(
+  selectedStockStatus,
+  (newValue) => {
+    filterByStockStatus(newValue);
   },
   { immediate: true }
 );
@@ -306,6 +321,18 @@ definePageMeta({
         </DialogHeader>
         <div class="mt-4 mb-4 flex items-center gap-4">
           <FilterBySearch @search-filter="filterBySearch" />
+          <Select v-model="selectedStockStatus">
+            <SelectTrigger class="w-[180px]">
+              <SelectValue placeholder="Select a stock status" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectGroup>
+                <SelectItem value="all">All of the stocks</SelectItem>
+                <SelectItem value="1">In Stock</SelectItem>
+                <SelectItem value="0">Out of Stock</SelectItem>
+              </SelectGroup>
+            </SelectContent>
+          </Select>
         </div>
         <div class="w-full rounded-lg border shadow-sm overflow-x-scroll">
           <Table>

@@ -18,7 +18,6 @@ export default defineNuxtRouteMiddleware(async (to, from) => {
 
   const adminRoutes = [
     "/sales-report",
-    "/transactions-report",
     "/shifts-report",
     "/discounts",
     "/product-inventory",

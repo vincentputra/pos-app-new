@@ -110,7 +110,7 @@ const cashierRoutes = [
       },
       {
         name: "Receipts",
-        path: "/receipts",
+        path: "/transactions-report",
         isActive: false,
       },
       {

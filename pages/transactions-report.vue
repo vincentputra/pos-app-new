@@ -29,6 +29,7 @@ import {
 } from "@/components/ui/pagination";
 import { RefreshCcw } from "lucide-vue-next";
 import { toast } from "vue-sonner";
+const { user, initAuth } = useAuth();
 import { useTransactions } from "@/composables/useTransactions";
 import { usePrice } from "@/composables/usePrice";
 import { useDate } from "@/composables/useDate";
@@ -45,18 +46,18 @@ const {
   formatNoReceipt,
   calculateDiscount,
   calculateChange,
-  calculateTotal,
 } = useTransactions();
 const { formatPrice } = usePrice();
 const { dateRange, formatDateTime } = useDate();
 
 const currentPage = ref(1);
 const itemsPerPage = ref(15);
-const selectedStatus = ref("");
+const selectedStatus = ref("all");
 const selectedUser = ref(0);
-const search = ref("all");
+const search = ref("");
 const selectedTransaction = ref(0);
 const isModalOpen = ref(false);
+const isRefunded = ref(false);
 const isDeleted = ref(false);
 const editingId = ref<number | null>(null);
 
@@ -94,18 +95,32 @@ const filterByDate = async (payload: any) => {
 
 onMounted(() => {
   nextTick(async () => {
+    await initAuth();
+    if (user.value?.role === 1) {
+      selectedUser.value = user.value.id;
+    }
     await handlePageChange(1);
   });
 });
 
 const openDetailModal = async (id: number) => {
+  isDeleted.value = false;
+  isRefunded.value = false;
   selectedTransaction.value = id;
   isModalOpen.value = true;
 };
 
 const openDeleteModal = (id: number) => {
   isDeleted.value = true;
+  isRefunded.value = false;
   editingId.value = id;
+  isModalOpen.value = true;
+};
+
+const openRefundModal = (id: number) => {
+  isDeleted.value = false;
+  isRefunded.value = true;
+  selectedTransaction.value = id;
   isModalOpen.value = true;
 };
 
@@ -163,7 +178,7 @@ definePageMeta({
 
     <div class="min-h-0 flex-1 p-4">
       <div class="mb-4 flex items-center gap-4">
-        <FilterByCashier @user-change="filterByUser" />
+        <FilterByCashier @user-change="filterByUser" v-if="user?.role !== 1" />
         <FilterByStatusTrans @status-change="filterByStatus" />
         <FilterByDate @date-change="filterByDate" />
         <!-- <FilterBySearch @search-filter="filterBySearch" /> -->
@@ -219,12 +234,22 @@ definePageMeta({
                       Detail
                     </Button>
                     <Button
+                      v-if="user?.role !== 1"
                       type="button"
                       variant="destructive"
                       size="sm"
                       @click="openDeleteModal(trans.id)"
                     >
                       Delete
+                    </Button>
+                    <Button
+                      v-else
+                      type="button"
+                      variant="destructive"
+                      size="sm"
+                      @click="openRefundModal(index)"
+                    >
+                      Refund
                     </Button>
                   </div>
                 </TableCell>

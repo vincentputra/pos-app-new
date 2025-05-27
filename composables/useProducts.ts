@@ -70,7 +70,7 @@ type Page = {
   stock_id?: number;
   type?: number;
   search?: string;
-  stock?: number;
+  stock_status?: string;
   date_range?: any;
 };
 
@@ -155,11 +155,11 @@ export const useProducts = () => {
         parameter = parameter + `&search=${payload.search}`;
       }
       if (
-        payload.stock !== undefined &&
-        payload.stock !== null &&
-        Number(payload.stock) !== 0
+        payload.stock_status !== undefined &&
+        payload.stock_status !== null &&
+        payload.stock_status !== "all"
       ) {
-        parameter = parameter + `&stock=${payload.user_id}`;
+        parameter = parameter + `&stock=${payload.stock_status}`;
       }
       const { data, error } = await useFetch<{
         data: Product[];

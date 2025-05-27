@@ -39,7 +39,7 @@ const handlePageChange = async (page: number) => {
     status: 0,
     user_id: selectedUser.value,
     search: search.value,
-    stock: 1,
+    stock_status: "1",
   });
 };
 
