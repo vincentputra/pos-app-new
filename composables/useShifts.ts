@@ -27,6 +27,7 @@ type ShiftDetail = {
   cash_balance: number;
   cash_payments: number;
   cash_refunds: number;
+  cash_changes: number;
   paid_in: number;
   paid_out: number;
   expected_cash_balance: number;
@@ -192,7 +193,7 @@ export const useShifts = () => {
       }
 
       if (!data.value) {
-        throw new Error("No response data received");
+        throw new Error("No data received from API");
       }
 
       isTheShiftOpen.value = true;
@@ -249,7 +250,7 @@ export const useShifts = () => {
       }
 
       if (!data.value) {
-        throw new Error("No response data received");
+        throw new Error("No data received from API");
       }
 
       isTheShiftOpen.value = false;
@@ -458,7 +459,7 @@ export const useShifts = () => {
       }
 
       if (!data.value) {
-        throw new Error("No response data received");
+        throw new Error("No data received from API");
       }
 
       return data.value;

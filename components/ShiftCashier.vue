@@ -87,8 +87,9 @@ const handleSubmitShift = async () => {
         <div class="space-y-2">
           <NumberField
             id="amount"
+            :min="0"
+            :step="1000"
             v-model="form.amount"
-            :default-value="100000"
             :format-options="{
               style: 'currency',
               currency: 'IDR',

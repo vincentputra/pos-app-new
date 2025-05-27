@@ -39,6 +39,10 @@ const cashReport = ref([
     balance: 0,
   },
   {
+    title: "Cash Changes",
+    balance: 0,
+  },
+  {
     title: "Cash Refunds",
     balance: 0,
   },
@@ -79,10 +83,11 @@ onMounted(async () => {
     await initShiftUser();
     cashReport.value[0].balance = shiftUser.value?.cash_balance ?? 0;
     cashReport.value[1].balance = shiftUser.value?.cash_payments ?? 0;
-    cashReport.value[2].balance = shiftUser.value?.cash_refunds ?? 0;
-    cashReport.value[3].balance = shiftUser.value?.paid_in ?? 0;
-    cashReport.value[4].balance = shiftUser.value?.paid_out ?? 0;
-    cashReport.value[5].balance = shiftUser.value?.expected_cash_balance ?? 0;
+    cashReport.value[2].balance = shiftUser.value?.cash_changes ?? 0;
+    cashReport.value[3].balance = shiftUser.value?.cash_refunds ?? 0;
+    cashReport.value[4].balance = shiftUser.value?.paid_in ?? 0;
+    cashReport.value[5].balance = shiftUser.value?.paid_out ?? 0;
+    cashReport.value[6].balance = shiftUser.value?.expected_cash_balance ?? 0;
     salesSummary.value[0].balance = shiftUser.value?.gross_sales ?? 0;
     salesSummary.value[1].balance = shiftUser.value?.refunds ?? 0;
     salesSummary.value[2].balance = shiftUser.value?.discounts ?? 0;
@@ -215,6 +220,8 @@ definePageMeta({
               <NumberField
                 id="amount"
                 v-model="form.amount"
+                :min="0"
+                :step="1000"
                 :format-options="{
                   style: 'currency',
                   currency: 'IDR',

@@ -1,6 +1,8 @@
 <script setup lang="ts">
 import { ref, onMounted, nextTick } from "vue";
 import { Button } from "@/components/ui/button";
+import { Skeleton } from "@/components/ui/skeleton";
+import { SheetTrigger } from "@/components/ui/sheet";
 import {
   Pagination,
   PaginationEllipsis,
@@ -11,6 +13,7 @@ import {
   PaginationNext,
   PaginationPrevious,
 } from "@/components/ui/pagination";
+import { ShoppingCart } from "lucide-vue-next";
 import { useAuth } from "@/composables/useAuth";
 import { useProducts } from "@/composables/useProducts";
 import { useCartStore } from "@/stores/useCartStore";
@@ -61,9 +64,14 @@ const addToCart = (product: any) => {
 </script>
 
 <template>
-  <div class="flex min-h-0 flex-1 flex-col p-6">
+  <div class="flex flex-col h-screen overflow-auto p-6 md:w-3/5 xl:w-3/4">
     <div class="mb-4 flex items-center gap-4">
       <FilterBySearch @search-filter="filterBySearch" />
+      <SheetTrigger as-child class="visible md:invisible">
+        <Button variant="outline">
+          <ShoppingCart class="mr-2 h-4 w-4" />
+        </Button>
+      </SheetTrigger>
     </div>
     <div class="flex-1">
       <div
@@ -77,13 +85,15 @@ const addToCart = (product: any) => {
           <div
             v-for="product in products"
             :key="product.id"
-            class="flex flex-col rounded-lg p-4 shadow transition-shadow hover:shadow-lg"
+            class="flex flex-col overflow-hidden"
           >
             <img
               :src="displayImage(product.image)"
               :alt="product.name"
               class="mb-4 aspect-square w-full rounded-lg object-cover"
+              v-if="product.image"
             />
+            <Skeleton v-else class="mb-4 aspect-square w-full rounded-lg" />
             <div class="flex flex-1 flex-col justify-end">
               <div class="grow">
                 <h3 class="font-medium text-gray-800">{{ product.name }}</h3>

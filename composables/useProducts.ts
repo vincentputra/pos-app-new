@@ -133,7 +133,11 @@ export const useProducts = () => {
       }
 
       let parameter = `page=${payload.page}&per_page=${payload.per_page}`;
-      if (payload.status !== undefined && payload.status !== null) {
+      if (
+        payload.status !== undefined &&
+        payload.status !== null &&
+        Number(payload.status) !== 3
+      ) {
         parameter = parameter + `&status=${payload.status}`;
       }
       if (
@@ -228,7 +232,7 @@ export const useProducts = () => {
       }
 
       if (!data.value) {
-        throw new Error("No response data received");
+        throw new Error("No data received from API");
       }
 
       return data.value;
@@ -289,7 +293,7 @@ export const useProducts = () => {
         }
 
         if (!data.value) {
-          throw new Error("No response data received");
+          throw new Error("No data received from API");
         }
       } else {
         // Create new stock product if it doesn't exist
@@ -313,11 +317,11 @@ export const useProducts = () => {
         }
 
         if (!data.value) {
-          throw new Error("No response data received");
+          throw new Error("No data received from API");
         }
       }
 
-      await fetchProducts(page);
+      //await fetchProducts(page);
     } catch (e) {
       error.value =
         e instanceof Error ? e.message : "Failed to update stock product";
@@ -450,7 +454,7 @@ export const useProducts = () => {
       }
 
       if (!data.value) {
-        throw new Error("No response data received");
+        throw new Error("No data received from API");
       }
 
       return data.value;
@@ -504,7 +508,7 @@ export const useProducts = () => {
       }
 
       if (!data.value) {
-        throw new Error("No response data received");
+        throw new Error("No data received from API");
       }
 
       return data.value;
@@ -548,7 +552,7 @@ export const useProducts = () => {
       }
 
       if (!data.value) {
-        throw new Error("No response data received");
+        throw new Error("No data received from API");
       }
 
       return data.value;

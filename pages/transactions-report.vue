@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { ref, onMounted, nextTick } from "vue";
 import { Button } from "@/components/ui/button";
+import { Separator } from "@/components/ui/separator";
 import {
   Table,
   TableBody,
@@ -27,6 +28,7 @@ import {
   PaginationPrevious,
 } from "@/components/ui/pagination";
 import { RefreshCcw } from "lucide-vue-next";
+import { toast } from "vue-sonner";
 import { useTransactions } from "@/composables/useTransactions";
 import { usePrice } from "@/composables/usePrice";
 import { useDate } from "@/composables/useDate";
@@ -35,8 +37,15 @@ const {
   transactions,
   pageTransaction,
   statusTransaction,
+  paymentMethods,
   isLoading,
+  error,
   fetchTransactions,
+  deleteTransaction,
+  formatNoReceipt,
+  calculateDiscount,
+  calculateChange,
+  calculateTotal,
 } = useTransactions();
 const { formatPrice } = usePrice();
 const { dateRange, formatDateTime } = useDate();
@@ -47,6 +56,9 @@ const selectedStatus = ref("");
 const selectedUser = ref(0);
 const search = ref("all");
 const selectedTransaction = ref(0);
+const isModalOpen = ref(false);
+const isDeleted = ref(false);
+const editingId = ref<number | null>(null);
 
 const handlePageChange = async (page: number) => {
   currentPage.value = page;
@@ -86,11 +98,31 @@ onMounted(() => {
   });
 });
 
-const isModalOpen = ref(false);
-
 const openDetailModal = async (id: number) => {
   selectedTransaction.value = id;
   isModalOpen.value = true;
+};
+
+const openDeleteModal = (id: number) => {
+  isDeleted.value = true;
+  editingId.value = id;
+  isModalOpen.value = true;
+};
+
+const handleDelete = async () => {
+  await deleteTransaction({ id: editingId.value });
+
+  if (error.value) {
+    toast.error(error.value ?? "Something went wrong");
+    return;
+  }
+
+  // Here you would typically make an API call to delete the transaction
+  transactions.value = transactions.value.filter(
+    (s) => s.id !== editingId.value
+  );
+  toast.success("Transaction deleted successfully");
+  isModalOpen.value = false;
 };
 
 definePageMeta({
@@ -158,7 +190,13 @@ definePageMeta({
             </template>
             <template v-else-if="transactions.length">
               <TableRow v-for="(trans, index) in transactions" :key="trans.id">
-                <TableCell>#{{ trans.id }}</TableCell>
+                <TableCell>{{
+                  formatNoReceipt({
+                    id: trans.id,
+                    date: trans.date,
+                    user: trans.user.id,
+                  })
+                }}</TableCell>
                 <TableCell>{{ trans.user.name }}</TableCell>
                 <TableCell>{{ formatDateTime(trans.date) }}</TableCell>
                 <TableCell>{{ formatPrice(trans.total_price) }}</TableCell>
@@ -179,6 +217,14 @@ definePageMeta({
                       @click="openDetailModal(index)"
                     >
                       Detail
+                    </Button>
+                    <Button
+                      type="button"
+                      variant="destructive"
+                      size="sm"
+                      @click="openDeleteModal(trans.id)"
+                    >
+                      Delete
                     </Button>
                   </div>
                 </TableCell>
@@ -219,11 +265,17 @@ definePageMeta({
     </div>
 
     <Dialog :open="isModalOpen" @update:open="isModalOpen = false">
-      <DialogContent>
+      <DialogContent v-if="!isDeleted">
         <DialogHeader>
-          <DialogTitle
-            ># {{ transactions[selectedTransaction].id }}</DialogTitle
-          >
+          <DialogTitle>
+            {{
+              formatNoReceipt({
+                id: transactions[selectedTransaction].id,
+                date: transactions[selectedTransaction].date,
+                user: transactions[selectedTransaction].user.id,
+              })
+            }}
+          </DialogTitle>
           <DialogDescription class="font-medium text-gray-800">
             <div>
               Receipt Date:
@@ -268,13 +320,69 @@ definePageMeta({
           </Table>
         </div>
         <div>
+          Subtotal:
+          {{ formatPrice(transactions[selectedTransaction].total_subtotal) }}
+        </div>
+        <div v-if="transactions[selectedTransaction].amount_discount > 0">
+          Discount:
+          {{
+            formatPrice(
+              calculateDiscount(
+                Number(transactions[selectedTransaction].total_subtotal),
+                transactions[selectedTransaction].type_discount,
+                Number(transactions[selectedTransaction].amount_discount)
+              )
+            )
+          }}
+        </div>
+        <div v-if="transactions[selectedTransaction].total_tax > 0">
+          Tax:
+          {{ formatPrice(transactions[selectedTransaction].total_tax) }}
+        </div>
+        <Separator class="my-1" />
+        <div>
           Total:
           {{ formatPrice(transactions[selectedTransaction].total_price) }}
         </div>
+        <Separator class="my-1" />
+        <div>
+          {{
+            paymentMethods.find(
+              (r) => r.id === transactions[selectedTransaction].payment_method
+            )?.name
+          }}:
+          {{ formatPrice(transactions[selectedTransaction].total_payment) }}
+        </div>
+        <div v-if="transactions[selectedTransaction].payment_method === 'cash'">
+          Change:
+          {{
+            formatPrice(
+              calculateChange(
+                Number(transactions[selectedTransaction].total_price),
+                Number(transactions[selectedTransaction].total_payment)
+              )
+            )
+          }}
+        </div>
         <DialogFooter>
-          <Button type="button" variant="ghost" @click="isModalOpen = false"
-            >Close</Button
-          >
+          <Button type="button" variant="ghost" @click="isModalOpen = false">
+            Close
+          </Button>
+        </DialogFooter>
+      </DialogContent>
+      <DialogContent v-else>
+        <DialogHeader>
+          <DialogTitle>Are you absolutely sure?</DialogTitle>
+          <DialogDescription>
+            This action cannot be undone. Are you sure you want to permanently
+            delete this file from our servers?
+          </DialogDescription>
+        </DialogHeader>
+        <DialogFooter class="sm:justify-between">
+          <Button type="button" variant="ghost" @click="isModalOpen = false">
+            Cancel
+          </Button>
+          <Button type="submit" @click="handleDelete">Confirm</Button>
         </DialogFooter>
       </DialogContent>
     </Dialog>

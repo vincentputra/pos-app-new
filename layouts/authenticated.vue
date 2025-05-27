@@ -68,6 +68,11 @@ const adminRoutes = [
     isActive: false,
     items: [
       {
+        name: "Discount",
+        path: "/discounts",
+        isActive: false,
+      },
+      {
         name: "Product",
         path: "/product-inventory",
         isActive: false,
@@ -263,9 +268,9 @@ onMounted(async () => {
       </SidebarFooter>
       <SidebarRail />
     </Sidebar>
-    <SidebarInset>
+    <SidebarInset class="flex-row">
       <header
-        class="flex h-16 shrink-0 items-center border-b px-4 transition-[width,height] ease-linear group-has-[[data-collapsible=icon]]/sidebar-wrapper:h-12"
+        class="flex h-full shrink-0 items-start border-r p-4 transition-[width,height] ease-linear group-has-[[data-collapsible=icon]]/sidebar-wrapper:h-12"
       >
         <SidebarTrigger class="-ml-1" />
       </header>

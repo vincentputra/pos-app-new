@@ -85,7 +85,7 @@ const handleSubmitCash = async (type: number) => {
 
   shiftHistories.value.push({
     id: (response as any).id ?? Date.now(),
-    shift_id: (response as any).user_id ?? shiftUser.value?.user_id,
+    shift_id: (response as any).shift_id ?? shiftUser.value?.id,
     type: (response as any).type ?? type,
     description: (response as any).description ?? form.desc,
     amount: (response as any).amount ?? form.amount,
@@ -161,7 +161,8 @@ definePageMeta({
           <NumberField
             id="amount"
             v-model="form.amount"
-            :default-value="1"
+            :min="0"
+            :step="1000"
             :format-options="{
               style: 'currency',
               currency: 'IDR',

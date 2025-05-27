@@ -46,6 +46,7 @@ const { formatPrice } = usePrice();
 const currentPage = ref(1);
 const itemsPerPage = ref(15);
 const selectedUser = ref(0);
+const inStock = ref(0);
 const search = ref("");
 const isModalOpen = ref(false);
 const editingId = ref<number | null>(null);
@@ -88,6 +89,7 @@ const openStockModal = async (stock: any) => {
   form.product_id = stock.id;
   form.user_id = selectedUser.value;
   form.quantity = Number(stock.total_stock);
+  inStock.value = Number(stock.total_stock);
   isModalOpen.value = true;
 };
 
@@ -103,6 +105,7 @@ const handleUpdateStock = async () => {
     user_id: selectedUser.value,
     search: search.value,
   });
+  await handlePageChange(1);
 
   toast.success("Stock updated successfully");
   closeModal();
@@ -242,7 +245,7 @@ definePageMeta({
         </DialogHeader>
         <form @submit.prevent="handleUpdateStock" class="space-y-4">
           <div class="space-y-2">
-            <NumberField id="stock" v-model="form.quantity">
+            <NumberField id="stock" :min="0" :step="1" v-model="form.quantity">
               <Label for="stock">Actual Stock</Label>
               <NumberFieldContent>
                 <NumberFieldDecrement />

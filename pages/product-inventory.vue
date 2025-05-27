@@ -18,6 +18,14 @@ import {
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
+import {
+  NumberField,
+  NumberFieldContent,
+  NumberFieldDecrement,
+  NumberFieldIncrement,
+  NumberFieldInput,
+} from "@/components/ui/number-field";
 import {
   Select,
   SelectContent,
@@ -380,6 +388,8 @@ definePageMeta({
             <NumberField
               id="amount"
               v-model="form.price"
+              :min="0"
+              :step="1000"
               :format-options="{
                 style: 'currency',
                 currency: 'IDR',
@@ -423,11 +433,10 @@ definePageMeta({
             <Label>Status</Label>
             <Select v-model="form.status">
               <SelectTrigger class="w-full">
-                <SelectValue placeholder="Select a role" />
+                <SelectValue placeholder="Select a status" />
               </SelectTrigger>
               <SelectContent>
                 <SelectGroup>
-                  <SelectLabel>Status</SelectLabel>
                   <SelectItem
                     v-for="status in statusProduct"
                     :key="status.id"
@@ -442,9 +451,9 @@ definePageMeta({
             {{ error }}
           </div>
           <DialogFooter class="sm:justify-between">
-            <Button type="button" variant="ghost" @click="closeModal"
-              >Cancel</Button
-            >
+            <Button type="button" variant="ghost" @click="closeModal">
+              Cancel
+            </Button>
             <Button type="submit">{{ isEditing ? "Update" : "Add" }}</Button>
           </DialogFooter>
         </form>

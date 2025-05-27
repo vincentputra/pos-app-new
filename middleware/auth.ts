@@ -20,6 +20,7 @@ export default defineNuxtRouteMiddleware(async (to, from) => {
     "/sales-report",
     "/transactions-report",
     "/shifts-report",
+    "/discounts",
     "/product-inventory",
     "/inventory-summary",
     "/inventory-adjustment",

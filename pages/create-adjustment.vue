@@ -253,6 +253,8 @@ definePageMeta({
                         <TableCell>
                           <NumberField
                             id="stock"
+                            :min="0"
+                            :step="1"
                             v-model="adjustment.actual_stock"
                           >
                             <NumberFieldContent>

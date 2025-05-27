@@ -2,16 +2,21 @@ import { ref } from "vue";
 import { useFetch, useRuntimeConfig } from "nuxt/app";
 import { useStorage } from "@/composables/useStorage";
 
-type User = {
+type Discount = {
   id: number;
   name: string;
-  email: string;
-  phone: string;
-  role: number;
-  password: string;
+  description: string;
+  type: number;
+  amount: number;
+  status: number;
 };
 
-type Role = {
+type Status = {
+  id: number;
+  name: string;
+};
+
+type Type = {
   id: number;
   name: string;
 };
@@ -19,14 +24,14 @@ type Role = {
 type Page = {
   page: number;
   per_page: number;
+  status?: number;
+  type?: number;
   search?: string;
-  role?: number;
 };
 
-export const useUsers = () => {
-  const users = ref<User[]>([]);
-  const usersByRole = ref<User[]>([]);
-  const pageUser = ref<{
+export const useDiscounts = () => {
+  const discounts = ref<Discount[]>([]);
+  const pageDiscount = ref<{
     current_page: number;
     last_page: number;
     per_page: number;
@@ -41,18 +46,32 @@ export const useUsers = () => {
   const error = ref<string | null>(null);
   const storage = useStorage();
   const config = useRuntimeConfig();
-  const roles = ref<Role[]>([
+  const statusDiscount = ref<Status[]>([
     {
       id: 0,
-      name: "Admin",
+      name: "Active",
     },
     {
       id: 1,
-      name: "Cashier",
+      name: "Disabled",
+    },
+    {
+      id: 2,
+      name: "Deleted",
+    },
+  ]);
+  const typeDiscount = ref<Type[]>([
+    {
+      id: 1,
+      name: "Fixed",
+    },
+    {
+      id: 2,
+      name: "Percentage",
     },
   ]);
 
-  const fetchUsers = async (payload: Page) => {
+  const fetchDiscounts = async (payload: Page) => {
     isLoading.value = true;
     error.value = null;
 
@@ -69,11 +88,18 @@ export const useUsers = () => {
 
       let parameter = `page=${payload.page}&per_page=${payload.per_page}`;
       if (
-        payload.role !== undefined &&
-        payload.role !== null &&
-        payload.role !== 2
+        payload.status !== undefined &&
+        payload.status !== null &&
+        Number(payload.status) !== 3
       ) {
-        parameter = parameter + `&role=${payload.role}`;
+        parameter = parameter + `&status=${payload.status}`;
+      }
+      if (
+        payload.type !== undefined &&
+        payload.type !== null &&
+        Number(payload.type) !== 0
+      ) {
+        parameter = parameter + `&type=${payload.type}`;
       }
       if (
         payload.search !== undefined &&
@@ -83,14 +109,14 @@ export const useUsers = () => {
         parameter = parameter + `&search=${payload.search}`;
       }
       const { data, error } = await useFetch<{
-        data: User[];
+        data: Discount[];
         meta: {
           current_page: number;
           last_page: number;
           per_page: number;
           total: number;
         };
-      }>(`${config.public.apiBase}/users?${parameter}`, {
+      }>(`${config.public.apiBase}/discounts?${parameter}`, {
         headers: {
           Authorization: `Bearer ${tokenData.value}`,
           Accept: "application/json",
@@ -98,69 +124,28 @@ export const useUsers = () => {
       });
 
       if (error.value) {
-        throw new Error(error.value.data.message || "Failed to fetch users");
+        throw new Error(
+          error.value.data.message || "Failed to fetch discounts"
+        );
       }
 
       if (!data.value?.data) {
         throw new Error("No data received from API");
       }
 
-      users.value = data.value.data;
-      pageUser.value = data.value.meta;
+      discounts.value = data.value.data;
+      pageDiscount.value = data.value.meta;
     } catch (e) {
-      error.value = e instanceof Error ? e.message : "Failed to fetch users";
+      error.value =
+        e instanceof Error ? e.message : "Failed to fetch discounts";
       throw new Error(error.value);
-      // error.value == "Unauthenticated."
-      //console.error("Error fetching users:", e);
+      //console.error("Error fetching products:", e);
     } finally {
       isLoading.value = false;
     }
   };
 
-  const createUser = async (payload: any) => {
-    isLoading.value = true;
-    error.value = null;
-
-    try {
-      const storedToken = storage.getItem("auth_token");
-      if (!storedToken) throw new Error("No auth token found");
-
-      let tokenData: { value: string; expiresAt: number };
-      try {
-        tokenData = JSON.parse(storedToken);
-      } catch {
-        throw new Error("Invalid token format");
-      }
-
-      const { data, error } = await useFetch(`${config.public.apiBase}/users`, {
-        method: "POST",
-        headers: {
-          Authorization: `Bearer ${tokenData.value}`,
-          Accept: "application/json",
-          "Content-Type": "application/json",
-        },
-        body: payload,
-      });
-
-      if (error.value) {
-        throw new Error(error.value.data.message || "Failed to create user");
-      }
-
-      if (!data.value) {
-        throw new Error("No data received from API");
-      }
-
-      return data.value;
-    } catch (e) {
-      error.value = e instanceof Error ? e.message : "Failed to create user";
-      throw new Error(error.value);
-      //console.error("Error creating user:", e);
-    } finally {
-      isLoading.value = false;
-    }
-  };
-
-  const updateUser = async (payload: any) => {
+  const createDiscount = async (payload: any) => {
     isLoading.value = true;
     error.value = null;
 
@@ -176,20 +161,21 @@ export const useUsers = () => {
       }
 
       const { data, error } = await useFetch(
-        `${config.public.apiBase}/users/${payload.id}`,
+        `${config.public.apiBase}/discounts`,
         {
-          method: "PATCH",
+          method: "POST",
           headers: {
             Authorization: `Bearer ${tokenData.value}`,
             Accept: "application/json",
-            "Content-Type": "application/json",
           },
           body: payload,
         }
       );
 
       if (error.value) {
-        throw new Error(error.value.data.message || "Failed to update user");
+        throw new Error(
+          error.value.data.message || "Failed to create discount"
+        );
       }
 
       if (!data.value) {
@@ -198,15 +184,15 @@ export const useUsers = () => {
 
       return data.value;
     } catch (e) {
-      error.value = e instanceof Error ? e.message : "Failed to update user";
+      error.value =
+        e instanceof Error ? e.message : "Failed to create discount";
       throw new Error(error.value);
-      //console.error("Error updating user:", e);
     } finally {
       isLoading.value = false;
     }
   };
 
-  const deleteUser = async (payload: any) => {
+  const updateDiscount = async (payload: any) => {
     isLoading.value = true;
     error.value = null;
 
@@ -222,7 +208,54 @@ export const useUsers = () => {
       }
 
       const { data, error } = await useFetch(
-        `${config.public.apiBase}/users/${payload.id}`,
+        `${config.public.apiBase}/discounts/${payload.id}`,
+        {
+          method: "PUT",
+          headers: {
+            Authorization: `Bearer ${tokenData.value}`,
+            Accept: "application/json",
+          },
+          body: payload,
+        }
+      );
+
+      if (error.value) {
+        throw new Error(
+          error.value.data.message || "Failed to update discount"
+        );
+      }
+
+      if (!data.value) {
+        throw new Error("No data received from API");
+      }
+
+      return data.value;
+    } catch (e) {
+      error.value =
+        e instanceof Error ? e.message : "Failed to update discount";
+      throw new Error(error.value);
+    } finally {
+      isLoading.value = false;
+    }
+  };
+
+  const deleteDiscount = async (payload: any) => {
+    isLoading.value = true;
+    error.value = null;
+
+    try {
+      const storedToken = storage.getItem("auth_token");
+      if (!storedToken) throw new Error("No auth token found");
+
+      let tokenData: { value: string; expiresAt: number };
+      try {
+        tokenData = JSON.parse(storedToken);
+      } catch {
+        throw new Error("Invalid token format");
+      }
+
+      const { data, error } = await useFetch(
+        `${config.public.apiBase}/discounts/${payload.id}`,
         {
           method: "DELETE",
           headers: {
@@ -234,7 +267,9 @@ export const useUsers = () => {
       );
 
       if (error.value) {
-        throw new Error(error.value.data.message || "Failed to delete user");
+        throw new Error(
+          error.value.data.message || "Failed to delete discount"
+        );
       }
 
       if (!data.value) {
@@ -243,7 +278,8 @@ export const useUsers = () => {
 
       return data.value;
     } catch (e) {
-      error.value = e instanceof Error ? e.message : "Failed to delete user";
+      error.value =
+        e instanceof Error ? e.message : "Failed to delete discount";
       throw new Error(error.value);
       //console.error("Error deleting user:", e);
     } finally {
@@ -251,62 +287,16 @@ export const useUsers = () => {
     }
   };
 
-  const fetchUsersByRole = async (role: number) => {
-    isLoading.value = true;
-    error.value = null;
-
-    try {
-      const storedToken = storage.getItem("auth_token");
-      if (!storedToken) throw new Error("No auth token found");
-
-      let tokenData: { value: string; expiresAt: number };
-      try {
-        tokenData = JSON.parse(storedToken);
-      } catch {
-        throw new Error("Invalid token format");
-      }
-
-      const { data, error } = await useFetch<{
-        data: User[];
-      }>(`${config.public.apiBase}/users/role/${role}`, {
-        headers: {
-          Authorization: `Bearer ${tokenData.value}`,
-          Accept: "application/json",
-        },
-      });
-
-      if (error.value) {
-        throw new Error(
-          error.value.data.message || "Failed to fetch users by role"
-        );
-      }
-
-      if (!data.value) {
-        throw new Error("No data received from API");
-      }
-
-      usersByRole.value = data.value.data;
-    } catch (e) {
-      error.value =
-        e instanceof Error ? e.message : "Failed to fetch users by role";
-      throw new Error(error.value);
-      //console.error("Error fetching users by role:", e);
-    } finally {
-      isLoading.value = false;
-    }
-  };
-
   return {
-    users,
-    pageUser,
-    usersByRole,
-    roles,
+    discounts,
+    pageDiscount,
+    statusDiscount,
+    typeDiscount,
     isLoading,
     error,
-    fetchUsers,
-    createUser,
-    updateUser,
-    deleteUser,
-    fetchUsersByRole,
+    fetchDiscounts,
+    createDiscount,
+    updateDiscount,
+    deleteDiscount,
   };
 };

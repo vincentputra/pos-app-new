@@ -18,6 +18,15 @@ import {
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import { Textarea } from "@/components/ui/textarea";
+import {
+  NumberField,
+  NumberFieldContent,
+  NumberFieldDecrement,
+  NumberFieldIncrement,
+  NumberFieldInput,
+} from "@/components/ui/number-field";
 import {
   Select,
   SelectContent,
@@ -37,32 +46,27 @@ import {
   PaginationPrevious,
 } from "@/components/ui/pagination";
 import { toast } from "vue-sonner";
-import { RefreshCcw, Plus, User } from "lucide-vue-next";
-import { useUsers } from "@/composables/useUsers";
-
-interface User {
-  id: number;
-  name: string;
-  email: string;
-  phone: string;
-  role: number;
-}
+import { RefreshCcw, Plus } from "lucide-vue-next";
+import { useDiscounts } from "@/composables/useDiscounts";
+import { usePrice } from "@/composables/usePrice";
 
 const {
-  users,
-  pageUser,
-  roles,
+  discounts,
+  pageDiscount,
+  statusDiscount,
+  typeDiscount,
   isLoading,
   error,
-  fetchUsers,
-  createUser,
-  updateUser,
-  deleteUser,
-} = useUsers();
+  fetchDiscounts,
+  createDiscount,
+  updateDiscount,
+  deleteDiscount,
+} = useDiscounts();
+const { formatPrice } = usePrice();
 
 const currentPage = ref(1);
 const itemsPerPage = ref(15);
-const selectedRole = ref(2);
+const selectedDiscountType = ref(0);
 const search = ref("");
 const isModalOpen = ref(false);
 const isEditing = ref(false);
@@ -71,10 +75,10 @@ const editingId = ref<number | null>(null);
 
 const handlePageChange = async (page: number) => {
   currentPage.value = page;
-  await fetchUsers({
+  await fetchDiscounts({
     page: currentPage.value,
     per_page: itemsPerPage.value,
-    role: selectedRole.value,
+    type: selectedDiscountType.value,
     search: search.value,
   });
 };
@@ -85,8 +89,8 @@ onMounted(() => {
   });
 });
 
-const filterByRole = async (payload: any) => {
-  selectedRole.value = Number(payload);
+const filterByDiscountType = async (payload: any) => {
+  selectedDiscountType.value = Number(payload);
   await handlePageChange(1);
 };
 
@@ -97,10 +101,10 @@ const filterBySearch = async (payload: any) => {
 
 const form = reactive({
   name: "",
-  email: "",
-  phone: "",
-  password: "",
-  role: 0,
+  description: "",
+  type: "1",
+  amount: 0,
+  status: 0,
 });
 
 const openAddModal = () => {
@@ -118,14 +122,15 @@ const openDeleteModal = (id: number) => {
   isModalOpen.value = true;
 };
 
-const openEditModal = (user: User) => {
+const openEditModal = (discount: any) => {
   isEditing.value = true;
   isDeleted.value = false;
-  editingId.value = user.id;
-  form.name = user.name;
-  form.email = user.email;
-  form.phone = user.phone;
-  form.role = user.role;
+  editingId.value = discount.id;
+  form.name = discount.name;
+  form.description = discount.description ?? "";
+  form.type = discount.type.toString();
+  form.amount = Number(discount.amount);
+  form.status = Number(discount.status);
   isModalOpen.value = true;
 };
 
@@ -136,22 +141,23 @@ const closeModal = () => {
 
 const resetForm = () => {
   form.name = "";
-  form.email = "";
-  form.phone = "";
-  form.password = "";
-  form.role = 0;
+  form.description = "";
+  form.type = "1";
+  form.amount = 0;
+  form.status = 0;
 };
 
 const handleSubmit = async () => {
+  let amount = Number(form.amount);
   if (isEditing.value) {
-    // Here you would typically make an API call to update the user
-    await updateUser({
+    // Here you would typically make an API call to update the discount
+    const response = await updateDiscount({
       id: editingId.value,
       name: form.name,
-      email: form.email,
-      phone: form.phone,
-      role: form.role,
-      password: form.password,
+      description: form.description,
+      type: Number(form.type),
+      amount: amount,
+      status: form.status,
     });
 
     if (error.value) {
@@ -159,31 +165,37 @@ const handleSubmit = async () => {
       return;
     }
 
-    // Update existing user
-    const index = users.value.findIndex(
+    // Update existing product
+    const index = discounts.value.findIndex(
       (s) => Number(s.id) === editingId.value
     );
 
     if (index !== -1) {
-      users.value[index] = {
+      discounts.value[index] = {
         id: editingId.value!,
-        name: form.name,
-        email: form.email,
-        phone: form.phone,
-        role: form.role,
-        password: form.password,
+        name: (response as any).data.name ?? form.name,
+        description: (response as any).data.description ?? form.description,
+        type: Number((response as any).data.type ?? form.type),
+        amount: (response as any).data.amount ?? amount,
+        status: Number((response as any).data.status ?? form.status),
       };
+
+      if (form.status === 2) {
+        discounts.value = discounts.value.filter(
+          (s) => s.id !== editingId.value
+        );
+      }
     }
 
-    toast.success("User updated successfully");
+    toast.success("Discount updated successfully");
   } else {
-    // Here you would typically make an API call to add the user
-    const response = await createUser({
+    // Here you would typically make an API call to add the product
+    const response = await createDiscount({
       name: form.name,
-      email: form.email,
-      phone: form.phone,
-      role: form.role,
-      password: form.password,
+      description: form.description,
+      type: Number(form.type),
+      amount: amount,
+      status: form.status,
     });
 
     if (error.value) {
@@ -191,32 +203,32 @@ const handleSubmit = async () => {
       return;
     }
 
-    // Add new user
-    users.value.push({
+    // Add new product
+    discounts.value.push({
       id: (response as any).id ?? Date.now(),
       name: (response as any).name ?? form.name,
-      email: (response as any).email ?? form.email,
-      phone: (response as any).phone ?? form.phone,
-      role: (response as any).role,
-      password: form.password,
+      description: (response as any).description ?? form.description,
+      type: (response as any).data.type.toString() ?? form.type,
+      amount: (response as any).data.amount ?? amount,
+      status: Number((response as any).data.status ?? form.status),
     });
 
-    toast.success("User added successfully");
+    toast.success("Discount added successfully");
   }
   closeModal();
 };
 
 const handleDelete = async () => {
-  await deleteUser({ id: editingId.value });
+  await deleteDiscount({ id: editingId.value });
 
   if (error.value) {
     toast.error(error.value ?? "Something went wrong");
     return;
   }
 
-  // Here you would typically make an API call to delete the user
-  users.value = users.value.filter((s) => s.id !== editingId.value);
-  toast.success("User deleted successfully");
+  // Here you would typically make an API call to delete the discount
+  discounts.value = discounts.value.filter((s) => s.id !== editingId.value);
+  toast.success("Discount deleted successfully");
   closeModal();
 };
 
@@ -230,16 +242,18 @@ definePageMeta({
   <div class="flex h-full w-full flex-1 flex-col">
     <header class="flex-none border-b border-gray-200 p-4">
       <div class="flex items-center justify-between">
-        <h1 class="text-2xl font-semibold text-gray-800">Employees</h1>
+        <h1 class="text-2xl font-semibold text-gray-800">Discount</h1>
         <div class="flex items-center gap-2">
           <Button
             type="button"
             variant="ghost"
             size="sm"
             @click="
-              fetchUsers({
+              fetchDiscounts({
                 page: currentPage,
                 per_page: itemsPerPage,
+                type: selectedDiscountType,
+                search: search,
               })
             "
           >
@@ -248,7 +262,7 @@ definePageMeta({
           </Button>
           <Button type="button" size="sm" @click="openAddModal">
             <Plus class="mr-2 h-4 w-4" />
-            Add Employee
+            Add Discount
           </Button>
         </div>
       </div>
@@ -256,7 +270,7 @@ definePageMeta({
 
     <div class="min-h-0 flex-1 p-4">
       <div class="mb-4 flex items-center gap-4">
-        <FilterByRole @role-change="filterByRole" />
+        <FilterByDiscountType @type-change="filterByDiscountType" />
         <FilterBySearch @search-filter="filterBySearch" />
       </div>
       <div class="rounded-lg border shadow-sm">
@@ -264,34 +278,41 @@ definePageMeta({
           <TableHeader>
             <TableRow>
               <TableHead>Name</TableHead>
-              <TableHead>Email</TableHead>
-              <TableHead>Phone</TableHead>
-              <TableHead>Role</TableHead>
+              <TableHead>Description</TableHead>
+              <TableHead>Type</TableHead>
+              <TableHead>Amount</TableHead>
+              <TableHead>Status</TableHead>
               <TableHead>Actions</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
             <template v-if="isLoading">
-              <TableRow v-for="n in pageUser.total ?? 5" :key="n">
+              <TableRow v-for="n in pageDiscount.total ?? 5" :key="n">
                 <TableCell v-for="m in 5" :key="m">
                   <div class="h-4 w-24 animate-pulse rounded bg-gray-100" />
                 </TableCell>
               </TableRow>
             </template>
-            <template v-else-if="users.length">
-              <TableRow v-for="user in users" :key="user.id">
-                <TableCell>{{ user.name }}</TableCell>
-                <TableCell>{{ user.email }}</TableCell>
-                <TableCell>{{ user.phone }}</TableCell>
+            <template v-else-if="discounts.length">
+              <TableRow v-for="discount in discounts" :key="discount.id">
+                <TableCell>{{ discount.name }}</TableCell>
+                <TableCell>{{ discount.description }}</TableCell>
                 <TableCell>{{
-                  roles.find((r) => r.id === user.role)?.name
+                  typeDiscount.find((r) => r.id === discount.type)?.name
+                }}</TableCell>
+                <TableCell v-if="discount.type == 1">{{
+                  formatPrice(discount.amount)
+                }}</TableCell>
+                <TableCell v-else>{{ discount.amount }}%</TableCell>
+                <TableCell>{{
+                  statusDiscount.find((r) => r.id === discount.status)?.name
                 }}</TableCell>
                 <TableCell>
-                  <div class="flex gap-2" v-if="user.id !== 0">
+                  <div class="flex gap-2" v-if="discount.id !== 0">
                     <Button
                       type="button"
                       size="sm"
-                      @click="openEditModal(user)"
+                      @click="openEditModal(discount)"
                     >
                       Edit
                     </Button>
@@ -299,7 +320,7 @@ definePageMeta({
                       type="button"
                       variant="destructive"
                       size="sm"
-                      @click="openDeleteModal(user.id)"
+                      @click="openDeleteModal(discount.id)"
                     >
                       Delete
                     </Button>
@@ -314,7 +335,7 @@ definePageMeta({
       <Pagination
         v-slot="{ page }"
         :items-per-page="itemsPerPage"
-        :total="pageUser.total"
+        :total="pageDiscount.total"
         :default-page="currentPage"
         :sibling-count="1"
         :class="'mt-4'"
@@ -346,7 +367,7 @@ definePageMeta({
       <DialogContent v-if="!isDeleted">
         <DialogHeader>
           <DialogTitle>{{
-            isEditing ? "Edit Employee" : "Add Employee"
+            isEditing ? "Edit Discount" : "Add Discount"
           }}</DialogTitle>
         </DialogHeader>
         <form @submit.prevent="handleSubmit" class="space-y-4">
@@ -355,45 +376,55 @@ definePageMeta({
             <Input id="name" v-model="form.name" required />
           </div>
           <div class="space-y-2">
-            <Label for="email">Email</Label>
-            <Input id="email" type="email" v-model="form.email" required />
+            <Label for="description">Description</Label>
+            <Textarea id="description" v-model="form.description" />
           </div>
           <div class="space-y-2">
-            <Label for="phone">Phone</Label>
-            <Input
-              id="phone"
-              type="tel"
-              pattern="[0-9]+"
-              v-model="form.phone"
-              required
-            />
-          </div>
-          <div class="space-y-2">
-            <Label for="password" v-if="!isEditing">Password</Label>
-            <Label for="password" v-else
-              >Password (Leave it empty if you don't need to update the
-              password)</Label
+            <Label for="type">Type</Label>
+            <RadioGroup
+              id="type"
+              :default-value="1"
+              v-model="form.type"
+              :orientation="'horizontal'"
             >
-            <Input
-              id="password"
-              type="password"
-              v-model="form.password"
-              v-bind:required="!isEditing"
-            />
+              <div class="flex items-center space-x-2">
+                <RadioGroupItem id="r1" value="1" />
+                <Label for="r1">Fixed Amount</Label>
+              </div>
+              <div class="flex items-center space-x-2">
+                <RadioGroupItem id="r2" value="2" />
+                <Label for="r2">Percentage</Label>
+              </div>
+            </RadioGroup>
           </div>
           <div class="space-y-2">
-            <Label for="name">Role</Label>
-            <Select v-model="form.role">
+            <NumberField
+              id="amount"
+              v-model="form.amount"
+              :min="0"
+              :step="form.type == '1' ? 1000 : 1"
+            >
+              <Label for="amount">Amount</Label>
+              <NumberFieldContent>
+                <NumberFieldDecrement />
+                <NumberFieldInput />
+                <NumberFieldIncrement />
+              </NumberFieldContent>
+            </NumberField>
+          </div>
+          <div class="space-y-2">
+            <Label>Status</Label>
+            <Select v-model="form.status">
               <SelectTrigger class="w-full">
-                <SelectValue placeholder="Select a role" />
+                <SelectValue placeholder="Select a status" />
               </SelectTrigger>
               <SelectContent>
                 <SelectGroup>
                   <SelectItem
-                    v-for="role in roles"
-                    :key="role.id"
-                    :value="role.id"
-                    >{{ role.name }}</SelectItem
+                    v-for="status in statusDiscount"
+                    :key="status.id"
+                    :value="status.id"
+                    >{{ status.name }}</SelectItem
                   >
                 </SelectGroup>
               </SelectContent>

@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { onMounted, nextTick } from "vue";
+import { Sheet, SheetContent } from "@/components/ui/sheet";
 import { toast } from "vue-sonner";
 import { useShifts } from "@/composables/useShifts";
 
@@ -29,12 +30,17 @@ definePageMeta({
 </script>
 
 <template>
-  <div class="flex h-full w-full">
-    <!-- Main Content -->
-    <ShiftCashier v-if="!isTheShiftOpen" @open-shift="handleOpenShift" />
-    <ProductGrid v-else />
+  <Sheet>
+    <div class="md:flex h-full w-full">
+      <!-- Main Content -->
+      <ShiftCashier v-if="!isTheShiftOpen" @open-shift="handleOpenShift" />
+      <ProductGrid v-else />
 
-    <!-- Cart Sidebar -->
-    <CartSidebar />
-  </div>
+      <!-- Cart Sidebar -->
+      <SheetContent class="w-full md:w-[540px]">
+        <CartSidebar />
+      </SheetContent>
+      <CartSidebar class="invisible md:visible" />
+    </div>
+  </Sheet>
 </template>
