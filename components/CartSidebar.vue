@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, watch, onMounted, nextTick } from "vue";
+import { ref, onMounted, nextTick } from "vue";
 import { Button } from "@/components/ui/button";
 import {
   Table,
