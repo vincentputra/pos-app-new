@@ -117,6 +117,11 @@ const handleOpenShift = async (payload: any) => {
 };
 
 const handleSubmitShift = async () => {
+  error.value = "";
+  if (form.amount <= 0) {
+    error.value = "Actual cash amount must be greater than 0";
+    return;
+  }
   await closeShift({
     final_cash_balance: form.amount,
   });
@@ -222,7 +227,17 @@ definePageMeta({
           </DialogHeader>
           <form @submit.prevent="handleSubmitShift" class="space-y-4">
             <div class="space-y-2">
-              <NumberField
+              <Label for="amount">Actual Cash Amount</Label>
+              <Input
+                id="amount"
+                type="number"
+                min="0"
+                v-model="form.amount"
+                class="text-center"
+                :placeholder="formatPrice(cashReport[6].balance)"
+                required
+              />
+              <!-- <NumberField
                 id="amount"
                 v-model="form.amount"
                 :min="0"
@@ -240,7 +255,10 @@ definePageMeta({
                   <NumberFieldInput />
                   <NumberFieldIncrement />
                 </NumberFieldContent>
-              </NumberField>
+              </NumberField> -->
+            </div>
+            <div v-if="error" class="mt-2 text-sm text-red-600">
+              {{ error }}
             </div>
             <DialogFooter class="sm:justify-between">
               <Button

@@ -163,6 +163,11 @@ const resetForm = () => {
 };
 
 const handleSubmit = async () => {
+  error.value = "";
+  if (form.price <= 0) {
+    error.value = "Price must be greater than 0";
+    return;
+  }
   if (isEditing.value) {
     // Here you would typically make an API call to update the product
     const response = await updateProduct({
@@ -385,7 +390,16 @@ definePageMeta({
             <Textarea id="description" v-model="form.description" />
           </div>
           <div class="space-y-2">
-            <NumberField
+            <Label for="amount">Price</Label>
+            <Input
+              id="amount"
+              type="number"
+              min="0"
+              v-model="form.price"
+              class="text-center"
+              required
+            />
+            <!-- <NumberField
               id="amount"
               v-model="form.price"
               :min="0"
@@ -403,7 +417,7 @@ definePageMeta({
                 <NumberFieldInput />
                 <NumberFieldIncrement />
               </NumberFieldContent>
-            </NumberField>
+            </NumberField> -->
           </div>
           <div class="space-y-2">
             <Label for="image"

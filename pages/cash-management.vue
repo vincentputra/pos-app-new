@@ -72,6 +72,15 @@ const resetForm = () => {
 };
 
 const handleSubmitCash = async (type: number) => {
+  error.value = "";
+  if (form.amount <= 0) {
+    error.value = "Amount must be greater than 0";
+    return;
+  }
+  if (form.desc === "") {
+    error.value = "Description is required";
+    return;
+  }
   const response = await createShiftHistory({
     description: form.desc,
     amount: form.amount,
@@ -158,7 +167,16 @@ definePageMeta({
           </DialogDescription>
         </DialogHeader>
         <div class="space-y-2">
-          <NumberField
+          <Label for="amount">Cash Amount</Label>
+          <Input
+            id="amount"
+            type="number"
+            min="0"
+            v-model="form.amount"
+            class="text-center"
+            required
+          />
+          <!-- <NumberField
             id="amount"
             v-model="form.amount"
             :min="0"
@@ -176,11 +194,14 @@ definePageMeta({
               <NumberFieldInput />
               <NumberFieldIncrement />
             </NumberFieldContent>
-          </NumberField>
+          </NumberField> -->
         </div>
         <div class="space-y-2">
           <Label for="desc">Description</Label>
           <Textarea id="desc" v-model="form.desc" required />
+        </div>
+        <div v-if="error" class="mt-2 text-sm text-red-600">
+          {{ error }}
         </div>
         <DialogFooter class="sm:justify-between">
           <Button type="button" variant="ghost" @click="closeModal"

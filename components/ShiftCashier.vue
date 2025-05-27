@@ -85,7 +85,16 @@ const handleSubmitShift = async () => {
       </DialogHeader>
       <form @submit.prevent="handleSubmitShift" class="space-y-4">
         <div class="space-y-2">
-          <NumberField
+          <Label for="amount">Amount</Label>
+          <Input
+            id="amount"
+            type="number"
+            min="0"
+            v-model="form.amount"
+            class="text-center"
+            required
+          />
+          <!-- <NumberField
             id="amount"
             :min="0"
             :step="1000"
@@ -103,7 +112,7 @@ const handleSubmitShift = async () => {
               <NumberFieldInput />
               <NumberFieldIncrement />
             </NumberFieldContent>
-          </NumberField>
+          </NumberField> -->
         </div>
         <DialogFooter class="sm:justify-between">
           <Button

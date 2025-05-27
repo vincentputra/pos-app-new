@@ -148,6 +148,11 @@ const resetForm = () => {
 };
 
 const handleSubmit = async () => {
+  error.value = "";
+  if (form.amount === 0) {
+    error.value = "Amount must be greater than 0";
+    return;
+  }
   let amount = Number(form.amount);
   if (isEditing.value) {
     // Here you would typically make an API call to update the discount
@@ -176,7 +181,7 @@ const handleSubmit = async () => {
         name: (response as any).data.name ?? form.name,
         description: (response as any).data.description ?? form.description,
         type: Number((response as any).data.type ?? form.type),
-        amount: (response as any).data.amount ?? amount,
+        amount: Number((response as any).data.amount ?? amount),
         status: Number((response as any).data.status ?? form.status),
       };
 
@@ -208,9 +213,9 @@ const handleSubmit = async () => {
       id: (response as any).id ?? Date.now(),
       name: (response as any).name ?? form.name,
       description: (response as any).description ?? form.description,
-      type: (response as any).data.type.toString() ?? form.type,
-      amount: (response as any).data.amount ?? amount,
-      status: Number((response as any).data.status ?? form.status),
+      type: Number(form.type),
+      amount: amount,
+      status: Number(form.status),
     });
 
     toast.success("Discount added successfully");

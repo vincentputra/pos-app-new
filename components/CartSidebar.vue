@@ -75,7 +75,7 @@ const isModalOpen = ref(false);
 const showPaymentDialog = ref(false);
 const selectedDiscount = ref<number | null>(null);
 const selectedPaymentMethod = ref("cash");
-const amountPaid = ref<number | null>(null);
+const amountPaid = ref<number | undefined>(undefined);
 const change = ref(0);
 
 const handlePageChange = async (page: number) => {
@@ -85,6 +85,7 @@ const handlePageChange = async (page: number) => {
     per_page: itemsPerPage.value,
     type: selectedDiscountType.value,
     search: search.value,
+    status: 0,
   });
 };
 
@@ -141,15 +142,14 @@ const calculateChange = () => {
 };
 
 const handlePrintBill = async () => {
+  error.value = "";
   if (cartItems.value.length === 0) return;
   if (!amountPaid.value || amountPaid.value < total.value) {
     error.value = "Please input the correct amount paid";
-    toast.error("Please input the correct amount paid");
     return;
   }
   if (!selectedPaymentMethod.value) {
     error.value = "Please select a payment method";
-    toast.error("Please select a payment method");
     return;
   }
 
@@ -192,7 +192,7 @@ const handlePrintBill = async () => {
   }
   selectedDiscount.value = null;
   selectedPaymentMethod.value = "cash";
-  amountPaid.value = null;
+  amountPaid.value = undefined;
   change.value = 0;
   error.value = "";
   showPaymentDialog.value = false;
@@ -291,7 +291,10 @@ const handlePrintBill = async () => {
         class="w-full"
         size="lg"
         :disabled="cartItems.length === 0 || isProcessing"
-        @click="showPaymentDialog = true"
+        @click="
+          showPaymentDialog = true;
+          error = '';
+        "
       >
         <Printer class="mr-2 h-4 w-4" />
         Print Bill
@@ -319,7 +322,17 @@ const handlePrintBill = async () => {
           </div>
           <div class="space-y-2">
             <Label for="amount">Amount Paid</Label>
-            <input
+            <Input
+              id="amount"
+              type="number"
+              min="0"
+              v-model="amountPaid"
+              class="text-center"
+              :placeholder="formatPrice(total)"
+              @input="calculateChange"
+              required
+            />
+            <!-- <input
               id="amount"
               type="number"
               v-model="amountPaid"
@@ -327,7 +340,7 @@ const handlePrintBill = async () => {
               min="0"
               :placeholder="formatPrice(total)"
               @input="calculateChange"
-            />
+            /> -->
           </div>
           <div class="space-y-2">
             <Label>Payment Method</Label>
@@ -350,48 +363,6 @@ const handlePrintBill = async () => {
           <div v-if="error" class="mt-2 text-sm text-red-600">
             {{ error }}
           </div>
-          <!-- <div
-              class="flex items-center justify-between space-y-2 text-gray-600"
-            >
-              <span>Amount Paid</span>
-              <div class="flex items-center space-x-2">
-                <input
-                  type="number"
-                  v-model="amountPaid"
-                  class="w-full rounded-lg border border-gray-200 p-2 text-right"
-                  min="0"
-                  :placeholder="formatPrice(total)"
-                  @input="calculateChange"
-                />
-              </div>
-            </div>
-            <div class="space-y-2">
-              <label class="text-gray-600">Payment Method</label>
-              <div class="grid grid-cols-2 gap-2">
-                <button
-                  v-for="method in paymentMethods"
-                  :key="method.id"
-                  @click="selectedPaymentMethod = method.id"
-                  :class="[
-                    'flex items-center justify-center rounded-lg border p-2 text-sm transition-colors',
-                    selectedPaymentMethod === method.id
-                      ? 'border-primary bg-primary text-white hover:bg-primary/90'
-                      : 'border-gray-200 hover:bg-gray-50',
-                  ]"
-                >
-                  {{ method.name }}
-                </button>
-              </div>
-            </div>
-            <div class="space-y-2">
-              <label class="text-gray-600">Note</label>
-              <textarea
-                v-model="note"
-                rows="2"
-                class="w-full rounded-lg border border-gray-200 p-2 text-sm"
-                placeholder="Add any special notes here..."
-              ></textarea>
-            </div> -->
         </div>
         <DialogFooter class="sm:justify-between">
           <Button
@@ -463,7 +434,10 @@ const handlePrintBill = async () => {
                       <Button
                         type="button"
                         size="sm"
-                        @click="selectedDiscount = discount.id"
+                        @click="
+                          selectedDiscount = discount.id;
+                          isModalOpen = false;
+                        "
                       >
                         Apply
                       </Button>
