@@ -144,7 +144,10 @@ const calculateChange = () => {
 const handlePrintBill = async () => {
   error.value = "";
   if (cartItems.value.length === 0) return;
-  if (!amountPaid.value || amountPaid.value < total.value) {
+  if (!amountPaid.value) {
+    amountPaid.value = total.value;
+  }
+  if (amountPaid.value < total.value) {
     error.value = "Please input the correct amount paid";
     return;
   }
@@ -159,7 +162,7 @@ const handlePrintBill = async () => {
     const userId = storedUser ? JSON.parse(storedUser).id : null;
 
     const payload = {
-      shift_id: shiftUser.value?.id ?? 0,
+      shift_id: shiftUser.value?.id || 0,
       user_id: userId,
       discount_id: selectedDiscount.value || null,
       payment_method: selectedPaymentMethod.value,
@@ -177,6 +180,9 @@ const handlePrintBill = async () => {
       })),
       subtotal: subtotal.value,
       change: change.value,
+      type_reason: "",
+      reason: "",
+      trans_id: null,
     };
 
     await createTransaction(payload);

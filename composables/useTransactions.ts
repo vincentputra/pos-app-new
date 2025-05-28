@@ -22,6 +22,8 @@ type TransactionPayload = {
   subtotal: number;
   change: number;
   details: TransactionItemPayload[];
+  type_reason?: string;
+  reason?: string;
 };
 
 type TransactionDetail = {
@@ -53,6 +55,9 @@ type Transaction = {
   payment_status: string;
   date: string;
   details: TransactionDetail[];
+  type_reason?: string;
+  reason?: string;
+  trans_id?: number | null;
 };
 
 type Status = {

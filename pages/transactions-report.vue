@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { ref, onMounted, nextTick } from "vue";
 import { Button } from "@/components/ui/button";
+import { Checkbox } from "@/components/ui/checkbox";
 import { Separator } from "@/components/ui/separator";
 import {
   Table,
@@ -27,13 +28,14 @@ import {
   PaginationNext,
   PaginationPrevious,
 } from "@/components/ui/pagination";
-import { RefreshCcw } from "lucide-vue-next";
+import { RefreshCcw, Loader2 } from "lucide-vue-next";
 import { toast } from "vue-sonner";
-const { user, initAuth } = useAuth();
+import { useAuth } from "@/composables/useAuth";
 import { useTransactions } from "@/composables/useTransactions";
 import { usePrice } from "@/composables/usePrice";
 import { useDate } from "@/composables/useDate";
 
+const { user, initAuth } = useAuth();
 const {
   transactions,
   pageTransaction,
@@ -42,6 +44,7 @@ const {
   isLoading,
   error,
   fetchTransactions,
+  createTransaction,
   deleteTransaction,
   formatNoReceipt,
   calculateDiscount,
@@ -60,6 +63,46 @@ const isModalOpen = ref(false);
 const isRefunded = ref(false);
 const isDeleted = ref(false);
 const editingId = ref<number | null>(null);
+const isProcessing = ref(false);
+
+const statusRefund = "refunded";
+const refundReasons = [
+  { id: "0", name: "Produk Return" },
+  { id: "1", name: "Misplaced Transaction" },
+  { id: "2", name: "Order cancelation" },
+  { id: "3", name: "Others" },
+];
+
+// refund
+const refundData = ref({
+  shift_id: 0,
+  user_id: 0,
+  discount_id: 0,
+  payment_method: "cash",
+  total_price: 0,
+  total_payment: 0,
+  total_tax: 0,
+  tax: 0,
+  type_discount: 0,
+  amount_discount: 0,
+  discount: 0,
+  payment_status: statusRefund,
+  date: new Intl.DateTimeFormat("en-CA").format(new Date()),
+  details: [
+    {
+      product_id: 0,
+      quantity: 0,
+      price: 0,
+      subtotal: 0,
+      old_quantity: 0,
+      is_refunded: false,
+    },
+  ],
+  subtotal: 0,
+  change: 0,
+  type_reason: "0",
+  reason: "",
+});
 
 const handlePageChange = async (page: number) => {
   currentPage.value = page;
@@ -117,13 +160,6 @@ const openDeleteModal = (id: number) => {
   isModalOpen.value = true;
 };
 
-const openRefundModal = (id: number) => {
-  isDeleted.value = false;
-  isRefunded.value = true;
-  selectedTransaction.value = id;
-  isModalOpen.value = true;
-};
-
 const handleDelete = async () => {
   await deleteTransaction({ id: editingId.value });
 
@@ -137,6 +173,149 @@ const handleDelete = async () => {
     (s) => s.id !== editingId.value
   );
   toast.success("Transaction deleted successfully");
+  isModalOpen.value = false;
+};
+
+const openRefundModal = (id: number) => {
+  isDeleted.value = false;
+  isRefunded.value = true;
+  selectedTransaction.value = id;
+  refundData.value = {
+    shift_id: transactions.value[selectedTransaction.value].shift_id,
+    user_id: transactions.value[selectedTransaction.value].user.id,
+    discount_id: transactions.value[selectedTransaction.value].discount_id,
+    payment_method:
+      transactions.value[selectedTransaction.value].payment_method,
+    total_price: transactions.value[selectedTransaction.value].total_price,
+    total_payment: transactions.value[selectedTransaction.value].total_payment,
+    total_tax: transactions.value[selectedTransaction.value].total_tax,
+    tax:
+      (transactions.value[selectedTransaction.value].total_price -
+        transactions.value[selectedTransaction.value].total_tax) /
+      transactions.value[selectedTransaction.value].total_tax,
+    type_discount: transactions.value[selectedTransaction.value].type_discount,
+    amount_discount:
+      transactions.value[selectedTransaction.value].amount_discount,
+    discount: calculateDiscount(
+      transactions.value[selectedTransaction.value].total_subtotal,
+      transactions.value[selectedTransaction.value].type_discount,
+      transactions.value[selectedTransaction.value].amount_discount
+    ),
+    payment_status: statusRefund,
+    date: new Intl.DateTimeFormat("en-CA").format(new Date()),
+    details: transactions.value[selectedTransaction.value].details.map(
+      (detail) => ({
+        product_id: detail.product.id,
+        quantity: detail.quantity,
+        price: detail.price,
+        subtotal: detail.subtotal,
+        old_quantity: detail.quantity,
+        is_refunded: true,
+      })
+    ),
+    subtotal: transactions.value[selectedTransaction.value].total_subtotal,
+    change:
+      transactions.value[selectedTransaction.value].total_payment -
+      transactions.value[selectedTransaction.value].total_price,
+    type_reason: "0",
+    reason: "",
+  };
+  isModalOpen.value = true;
+};
+
+const calculateRefund = (index: number, is_refunded?: boolean) => {
+  // Destructure the item to simplify access
+  const item = refundData.value.details[index];
+
+  // Set is_refunded
+  item.is_refunded = is_refunded || item.is_refunded;
+
+  // Clamp quantity to maxQty
+  const maxQty = Number(item.old_quantity);
+  let qty = Number(item.quantity);
+  if (qty > maxQty) {
+    item.quantity = maxQty;
+    toast.error("Refund quantity cannot be greater than the original quantity");
+    return;
+  }
+
+  // Calculate subtotal for current item
+  item.subtotal = Number(item.quantity * item.price);
+
+  // Calculate overall subtotal from all refunded items
+  const subtotal = refundData.value.details.reduce((acc, detail) => {
+    return detail.is_refunded ? acc + detail.price * detail.quantity : acc;
+  }, 0);
+
+  // Update refund data
+  refundData.value.subtotal = subtotal;
+
+  // Calculate discount
+  const discount = calculateDiscount(
+    subtotal,
+    refundData.value.type_discount,
+    Number(refundData.value.amount_discount)
+  );
+  refundData.value.discount = discount;
+
+  // Apply discount and calculate tax/total
+  const discountedTotal = subtotal - discount;
+
+  const totalTax =
+    discountedTotal > 0 ? discountedTotal / refundData.value.tax : 0;
+  refundData.value.total_tax = totalTax;
+  refundData.value.total_price =
+    discountedTotal > 0 ? discountedTotal + totalTax : 0;
+};
+
+const handleRefund = async () => {
+  error.value = "";
+  if (refundData.value.details.length === 0) {
+    error.value = "No products to refund";
+    return;
+  }
+  const refundedItems = refundData.value.details.filter(
+    (item) => item.is_refunded
+  );
+  if (refundedItems.length === 0) {
+    error.value = "No products to refund";
+    return;
+  }
+
+  isProcessing.value = true;
+  try {
+    const payload = {
+      shift_id: refundData.value.shift_id,
+      user_id: user.value?.id || 0,
+      discount_id: refundData.value.discount_id || null,
+      payment_method: refundData.value.payment_method,
+      total_price: refundData.value.total_price,
+      total_payment: refundData.value.total_price,
+      total_tax: refundData.value.total_tax,
+      type_discount: refundData.value.type_discount,
+      amount_discount: refundData.value.amount_discount,
+      payment_status: refundData.value.payment_status,
+      date: new Intl.DateTimeFormat("en-CA").format(new Date()),
+      details: refundedItems.map((item) => ({
+        product_id: item.product_id,
+        quantity: item.quantity,
+        price: item.price,
+      })),
+      subtotal: refundData.value.subtotal,
+      change: refundData.value.change,
+      type_reason: refundData.value.type_reason,
+      reason: refundData.value.reason,
+      trans_id: transactions.value[selectedTransaction.value].id,
+    };
+
+    await createTransaction(payload);
+    toast.success("Refund processed successfully");
+  } catch (e) {
+    error.value = e instanceof Error ? e.message : "Failed to process refund";
+  } finally {
+    isProcessing.value = false;
+  }
+  await handlePageChange(1);
   isModalOpen.value = false;
 };
 
@@ -217,7 +396,7 @@ definePageMeta({
                 <TableCell>{{ formatPrice(trans.total_price) }}</TableCell>
                 <TableCell
                   :class="
-                    trans.payment_status === 'refunded' ? 'text-red-600' : ''
+                    trans.payment_status === statusRefund ? 'text-red-600' : ''
                   "
                   >{{
                     statusTransaction.find((r) => r.id === trans.payment_status)
@@ -243,7 +422,7 @@ definePageMeta({
                       Delete
                     </Button>
                     <Button
-                      v-else
+                      v-if="user?.role === 1 && trans.payment_status === 'paid'"
                       type="button"
                       variant="destructive"
                       size="sm"
@@ -292,7 +471,7 @@ definePageMeta({
     <Dialog :open="isModalOpen" @update:open="isModalOpen = false">
       <DialogContent v-if="!isDeleted">
         <DialogHeader>
-          <DialogTitle>
+          <DialogTitle class="mb-4">
             {{
               formatNoReceipt({
                 id: transactions[selectedTransaction].id,
@@ -301,7 +480,7 @@ definePageMeta({
               })
             }}
           </DialogTitle>
-          <DialogDescription class="font-medium text-gray-800">
+          <DialogDescription class="font-medium text-gray-800 space-y-2">
             <div>
               Receipt Date:
               {{ formatDateTime(transactions[selectedTransaction].date) }}
@@ -309,7 +488,13 @@ definePageMeta({
             <div>
               Cashier: {{ transactions[selectedTransaction].user.name }}
             </div>
-            <div>
+            <div
+              :class="{
+                'text-red-600':
+                  transactions[selectedTransaction].payment_status ==
+                  statusRefund,
+              }"
+            >
               Payment Status:
               {{
                 statusTransaction.find(
@@ -318,12 +503,21 @@ definePageMeta({
                 )?.name
               }}
             </div>
+            <div
+              v-if="
+                transactions[selectedTransaction].payment_status == statusRefund
+              "
+              class="text-red-600"
+            >
+              {{ transactions[selectedTransaction].reason }}
+            </div>
           </DialogDescription>
         </DialogHeader>
-        <div class="rounded-lg border shadow-sm">
+        <div class="w-full rounded-lg border shadow-sm overflow-x-scroll">
           <Table>
             <TableHeader>
               <TableRow>
+                <TableHead v-if="isRefunded"></TableHead>
                 <TableHead class="w-[150px]">Product</TableHead>
                 <TableHead>Quantity</TableHead>
                 <TableHead>Price</TableHead>
@@ -332,66 +526,168 @@ definePageMeta({
             </TableHeader>
             <TableBody>
               <TableRow
-                v-for="transDetail in transactions[selectedTransaction].details"
+                v-for="(transDetail, index) in transactions[selectedTransaction]
+                  .details"
               >
+                <TableCell v-if="isRefunded">
+                  <Checkbox
+                    id="terms"
+                    :model-value="
+                      refundData.details[index]?.product_id ===
+                        transDetail.product.id &&
+                      refundData.details[index]?.is_refunded
+                    "
+                    @update:model-value="
+                      (value) => {
+                        refundData.details[index].is_refunded = value === true;
+                        calculateRefund(index, value === true);
+                      }
+                    "
+                  />
+                </TableCell>
                 <TableCell class="font-medium">
                   {{ transDetail.product.name }}
                 </TableCell>
-                <TableCell>{{ transDetail.quantity }}</TableCell>
+                <TableCell>
+                  <div v-if="!isRefunded">{{ transDetail.quantity }}</div>
+                  <div v-else>
+                    <Input
+                      type="number"
+                      min="1"
+                      :max="transDetail.quantity"
+                      v-model="refundData.details[index].quantity"
+                      class="text-center"
+                      @input="calculateRefund(index)"
+                    />
+                  </div>
+                </TableCell>
                 <TableCell>{{ formatPrice(transDetail.price) }}</TableCell>
-                <TableCell>{{ formatPrice(transDetail.subtotal) }}</TableCell>
+                <TableCell>
+                  <div v-if="!isRefunded">
+                    {{ formatPrice(transDetail.subtotal) }}
+                  </div>
+                  <div v-else class="text-red-600">
+                    {{ formatPrice(refundData.details[index].subtotal) }}
+                  </div>
+                </TableCell>
               </TableRow>
             </TableBody>
           </Table>
         </div>
-        <div>
-          Subtotal:
-          {{ formatPrice(transactions[selectedTransaction].total_subtotal) }}
+        <div class="space-y-4 text-sm">
+          <div class="flex justify-between">
+            <div>
+              Subtotal:
+              {{
+                formatPrice(transactions[selectedTransaction].total_subtotal)
+              }}
+            </div>
+            <div class="text-red-600" v-if="isRefunded">
+              {{ formatPrice(refundData.subtotal) }}
+            </div>
+          </div>
+          <div
+            class="flex justify-between"
+            v-if="transactions[selectedTransaction].amount_discount > 0"
+          >
+            <div>
+              Discount:
+              {{
+                formatPrice(
+                  calculateDiscount(
+                    Number(transactions[selectedTransaction].total_subtotal),
+                    transactions[selectedTransaction].type_discount,
+                    Number(transactions[selectedTransaction].amount_discount)
+                  )
+                )
+              }}
+            </div>
+            <div class="text-red-600" v-if="isRefunded">
+              {{ formatPrice(refundData.discount) }}
+            </div>
+          </div>
+          <div
+            class="flex justify-between"
+            v-if="transactions[selectedTransaction].total_tax > 0"
+          >
+            <div>
+              Tax:
+              {{ formatPrice(transactions[selectedTransaction].total_tax) }}
+            </div>
+            <div class="text-red-600" v-if="isRefunded">
+              {{ formatPrice(refundData.total_tax) }}
+            </div>
+          </div>
+          <Separator />
+          <div class="flex justify-between">
+            <div>
+              Total:
+              {{ formatPrice(transactions[selectedTransaction].total_price) }}
+            </div>
+            <div class="text-red-600" v-if="isRefunded">
+              {{ formatPrice(refundData.total_price) }}
+            </div>
+          </div>
+          <Separator />
+          <div v-if="!isRefunded">
+            <div>
+              {{
+                paymentMethods.find(
+                  (r) =>
+                    r.id === transactions[selectedTransaction].payment_method
+                )?.name
+              }}:
+              {{ formatPrice(transactions[selectedTransaction].total_payment) }}
+            </div>
+            <div
+              v-if="transactions[selectedTransaction].payment_method === 'cash'"
+            >
+              Change:
+              {{
+                formatPrice(
+                  calculateChange(
+                    Number(transactions[selectedTransaction].total_price),
+                    Number(transactions[selectedTransaction].total_payment)
+                  )
+                )
+              }}
+            </div>
+          </div>
+          <div v-else class="space-y-4">
+            <div class="space-y-3">
+              <Label>Reason to refund</Label>
+              <Select v-model="refundData.type_reason">
+                <SelectTrigger class="w-full">
+                  <SelectValue placeholder="Select a reason" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectGroup>
+                    <SelectItem
+                      v-for="reason in refundReasons"
+                      :key="reason.id"
+                      :value="reason.id"
+                      >{{ reason.name }}</SelectItem
+                    >
+                  </SelectGroup>
+                </SelectContent>
+              </Select>
+            </div>
+            <div v-if="refundData.type_reason == '3'" class="space-y-3">
+              <Label for="reason">Reason Others</Label>
+              <Textarea id="reason" v-model="refundData.reason" />
+            </div>
+            <div v-if="error" class="mt-2 text-red-600">
+              {{ error }}
+            </div>
+          </div>
         </div>
-        <div v-if="transactions[selectedTransaction].amount_discount > 0">
-          Discount:
-          {{
-            formatPrice(
-              calculateDiscount(
-                Number(transactions[selectedTransaction].total_subtotal),
-                transactions[selectedTransaction].type_discount,
-                Number(transactions[selectedTransaction].amount_discount)
-              )
-            )
-          }}
-        </div>
-        <div v-if="transactions[selectedTransaction].total_tax > 0">
-          Tax:
-          {{ formatPrice(transactions[selectedTransaction].total_tax) }}
-        </div>
-        <Separator class="my-1" />
-        <div>
-          Total:
-          {{ formatPrice(transactions[selectedTransaction].total_price) }}
-        </div>
-        <Separator class="my-1" />
-        <div>
-          {{
-            paymentMethods.find(
-              (r) => r.id === transactions[selectedTransaction].payment_method
-            )?.name
-          }}:
-          {{ formatPrice(transactions[selectedTransaction].total_payment) }}
-        </div>
-        <div v-if="transactions[selectedTransaction].payment_method === 'cash'">
-          Change:
-          {{
-            formatPrice(
-              calculateChange(
-                Number(transactions[selectedTransaction].total_price),
-                Number(transactions[selectedTransaction].total_payment)
-              )
-            )
-          }}
-        </div>
-        <DialogFooter>
+        <DialogFooter :class="{ 'sm:justify-between': isRefunded }">
           <Button type="button" variant="ghost" @click="isModalOpen = false">
             Close
+          </Button>
+          <Button v-if="isRefunded" type="button" @click="handleRefund">
+            <Loader2 v-if="isProcessing" class="mr-2 h-4 w-4 animate-spin" />
+            {{ isProcessing ? "Processing..." : "Confirm Refund" }}
           </Button>
         </DialogFooter>
       </DialogContent>

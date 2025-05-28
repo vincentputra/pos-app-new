@@ -382,7 +382,7 @@ definePageMeta({
             />
           </div>
           <div class="space-y-2">
-            <Label for="name">Role</Label>
+            <Label>Role</Label>
             <Select v-model="form.role">
               <SelectTrigger class="w-full">
                 <SelectValue placeholder="Select a role" />
