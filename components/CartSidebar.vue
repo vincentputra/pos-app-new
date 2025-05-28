@@ -40,7 +40,7 @@ import {
   Minus,
   Plus,
   CircleX,
-  Printer,
+  HandCoins,
   TicketPercent,
   Loader2,
 } from "lucide-vue-next";
@@ -187,7 +187,7 @@ const handlePrintBill = async () => {
 
     await createTransaction(payload);
     cartStore.reset();
-    toast.success("Bill has been printed and transaction recorded");
+    toast.success("Transaction successfully!");
   } catch (error) {
     console.error("Transaction failed:", error);
     toast.error(
@@ -302,8 +302,8 @@ const handlePrintBill = async () => {
           error = '';
         "
       >
-        <Printer class="mr-2 h-4 w-4" />
-        Print Bill
+        <HandCoins class="mr-2 h-4 w-4" />
+        Payment
       </Button>
     </div>
     <Dialog :open="showPaymentDialog" @update:open="showPaymentDialog = false">
