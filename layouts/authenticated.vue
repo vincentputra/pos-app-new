@@ -162,7 +162,11 @@ const updateActivePage = (newPath: any) => {
       page.path === newPath || page.items.some((item) => item.path === newPath),
     items: page.items.map((item) => ({
       ...item,
-      isActive: item.path === newPath,
+      isActive:
+        item.path === newPath ||
+        ("/create-adjustment" === newPath &&
+          item.path === "/inventory-adjustment") ||
+        ("/cash-management" === newPath && item.path === "/shift"),
     })),
   }));
 };
@@ -211,17 +215,21 @@ onMounted(async () => {
             >
               <SidebarMenuItem>
                 <CollapsibleTrigger as-child>
-                  <SidebarMenuButton v-if="item.items.length">
+                  <SidebarMenuSubButton v-if="item.items.length">
                     {{ item.name }}
                     <ChevronRight
                       class="ml-auto transition-transform group-data-[state=open]/collapsible:rotate-90"
                     />
-                  </SidebarMenuButton>
-                  <SidebarMenuButton v-else :is-active="item.isActive">
+                  </SidebarMenuSubButton>
+                  <SidebarMenuSubButton
+                    v-else
+                    :is-active="item.isActive"
+                    :class="[item.isActive ? 'font-semibold' : '']"
+                  >
                     <NuxtLink :to="item.path" class="w-full">
                       {{ item.name }}
                     </NuxtLink>
-                  </SidebarMenuButton>
+                  </SidebarMenuSubButton>
                 </CollapsibleTrigger>
 
                 <CollapsibleContent v-if="item.items.length">
@@ -232,6 +240,7 @@ onMounted(async () => {
                     >
                       <SidebarMenuSubButton
                         as-child
+                        :class="[childItem.isActive ? 'font-semibold' : '']"
                         :is-active="childItem.isActive"
                       >
                         <NuxtLink :to="childItem.path" class="w-full">
