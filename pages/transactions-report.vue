@@ -629,7 +629,12 @@ definePageMeta({
             </div>
           </div>
           <Separator />
-          <div v-if="!isRefunded">
+          <div
+            v-if="
+              !isRefunded &&
+              transactions[selectedTransaction].payment_status !== statusRefund
+            "
+          >
             <div>
               {{
                 paymentMethods.find(
@@ -653,7 +658,7 @@ definePageMeta({
               }}
             </div>
           </div>
-          <div v-else class="space-y-4">
+          <div v-if="isRefunded" class="space-y-4">
             <div class="space-y-3">
               <Label>Reason to refund</Label>
               <Select v-model="refundData.type_reason">

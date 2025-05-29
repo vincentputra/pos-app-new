@@ -118,6 +118,10 @@ export const useTransactions = () => {
     { id: "cash", name: "Cash" },
   ];
   const taxAmount = 10 / 100;
+  const grossSalesInfo =
+    "Gross sales is calculated by adding together all sales receipts before discounts, returns, and allowances.";
+  const netSalesInfo =
+    "Net sales are calculated by deducting sales allowances, sales discounts, and sales returns from gross sales.";
 
   const formatNoReceipt = (payload: any) => {
     const date = new Date(payload.date ?? "");
@@ -435,6 +439,8 @@ export const useTransactions = () => {
     reports,
     paymentMethods,
     taxAmount,
+    grossSalesInfo,
+    netSalesInfo,
     isLoading,
     error,
     statusTransaction,

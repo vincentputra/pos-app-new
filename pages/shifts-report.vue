@@ -87,19 +87,19 @@ const salesSummary = ref([
     balance: 0,
   },
   {
-    title: "Refund Sales",
+    title: "Refunds",
     balance: 0,
   },
   {
-    title: "Discount Sales",
-    balance: 0,
-  },
-  {
-    title: "Tax Sales",
+    title: "Discounts",
     balance: 0,
   },
   {
     title: "Net Sales",
+    balance: 0,
+  },
+  {
+    title: "Tax Sales",
     balance: 0,
   },
 ]);
@@ -144,8 +144,8 @@ const openDetailModal = async (id: number) => {
   salesSummary.value[0].balance = shiftDetail.value?.gross_sales ?? 0;
   salesSummary.value[1].balance = shiftDetail.value?.refunds ?? 0;
   salesSummary.value[2].balance = shiftDetail.value?.discounts ?? 0;
-  salesSummary.value[3].balance = shiftDetail.value?.tax_sales ?? 0;
-  salesSummary.value[4].balance = shiftDetail.value?.net_sales ?? 0;
+  salesSummary.value[3].balance = shiftDetail.value?.net_sales ?? 0;
+  salesSummary.value[4].balance = shiftDetail.value?.tax_sales ?? 0;
   isModalOpen.value = true;
 };
 
@@ -282,17 +282,19 @@ definePageMeta({
     <Dialog :open="isModalOpen" @update:open="isModalOpen = false">
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>Shift {{ shiftDetail?.user.name }}</DialogTitle>
-          <DialogDescription class="font-medium text-gray-800">
+          <DialogTitle class="mb-4">Shift Report</DialogTitle>
+          <DialogDescription class="font-medium text-gray-800 space-y-2">
             <div>
-              Open Shift at
+              Cashier:
+              {{ shiftDetail?.user?.name ?? "N/A" }}
+            </div>
+            <div>
+              Open Shift:
               {{ formatDateTime(shiftDetail?.created_at ?? new Date()) }}
             </div>
             <div v-if="shiftDetail?.updated_at">
-              Closed Shift at
-              {{
-                formatDateTime(new Date(shiftDetail?.updated_at ?? new Date()))
-              }}
+              Closed Shift:
+              {{ formatDateTime(shiftDetail?.updated_at ?? new Date()) }}
             </div>
           </DialogDescription>
         </DialogHeader>
@@ -332,9 +334,9 @@ definePageMeta({
           </Table>
         </div>
         <DialogFooter>
-          <Button type="button" variant="ghost" @click="isModalOpen = false"
-            >Close</Button
-          >
+          <Button type="button" variant="ghost" @click="isModalOpen = false">
+            Close
+          </Button>
         </DialogFooter>
       </DialogContent>
     </Dialog>

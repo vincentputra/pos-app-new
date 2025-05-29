@@ -19,20 +19,27 @@ import {
   PaginationNext,
   PaginationPrevious,
 } from "@/components/ui/pagination";
-import { RefreshCcw } from "lucide-vue-next";
+import { RefreshCcw, Info } from "lucide-vue-next";
 import { useAuth } from "@/composables/useAuth";
 import { useTransactions } from "@/composables/useTransactions";
 import { usePrice } from "@/composables/usePrice";
 import { useDate } from "@/composables/useDate";
 
 const { user, initAuth } = useAuth();
-const { reports, pageTransaction, isLoading, fetchReports, calculateNetSales } =
-  useTransactions();
+const {
+  reports,
+  pageTransaction,
+  grossSalesInfo,
+  netSalesInfo,
+  isLoading,
+  fetchReports,
+  calculateNetSales,
+} = useTransactions();
 const { formatPrice } = usePrice();
 const { dateRange, formatDateTime } = useDate();
 
 const currentPage = ref(1);
-const itemsPerPage = ref(1);
+const itemsPerPage = ref(15);
 const selectedStatus = ref("all");
 const selectedUser = ref(0);
 
@@ -110,11 +117,34 @@ definePageMeta({
           <TableHeader>
             <TableRow>
               <TableHead>Date</TableHead>
-              <TableHead>Gross Sales (+Tax)</TableHead>
-              <TableHead>Gross Sales</TableHead>
+              <TableHead class="flex items-center">
+                Gross Sales
+                <TooltipProvider>
+                  <Tooltip>
+                    <TooltipTrigger as-child>
+                      <Info class="w-4 h-4 ml-2" />
+                    </TooltipTrigger>
+                    <TooltipContent>
+                      {{ grossSalesInfo }}
+                    </TooltipContent>
+                  </Tooltip>
+                </TooltipProvider>
+              </TableHead>
               <TableHead>Refunds</TableHead>
               <TableHead>Discounts</TableHead>
-              <TableHead>Net Sales</TableHead>
+              <TableHead class="flex items-center">
+                Net Sales
+                <TooltipProvider>
+                  <Tooltip>
+                    <TooltipTrigger as-child>
+                      <Info class="w-4 h-4 ml-2" />
+                    </TooltipTrigger>
+                    <TooltipContent>
+                      {{ netSalesInfo }}
+                    </TooltipContent>
+                  </Tooltip>
+                </TooltipProvider>
+              </TableHead>
               <TableHead>Paid Transactions</TableHead>
               <TableHead>Refunded Transactions</TableHead>
             </TableRow>
@@ -130,18 +160,21 @@ definePageMeta({
             <template v-else-if="reports.length">
               <TableRow v-for="trans in reports" :key="trans.id">
                 <TableCell>{{ formatDateTime(trans.date) }}</TableCell>
-                <TableCell>{{ formatPrice(trans.paid["total"]) }}</TableCell>
                 <TableCell>{{ formatPrice(trans.paid["subtotal"]) }}</TableCell>
                 <TableCell>{{
                   formatPrice(trans.refunded["subtotal"])
                 }}</TableCell>
-                <TableCell>{{ formatPrice(trans.total_discount) }}</TableCell>
+                <TableCell>{{
+                  formatPrice(
+                    trans.paid["discount"] - trans.refunded["discount"]
+                  )
+                }}</TableCell>
                 <TableCell>{{
                   formatPrice(
                     calculateNetSales(
                       trans.paid["subtotal"],
                       trans.refunded["subtotal"],
-                      trans.total_discount
+                      trans.paid["discount"] - trans.refunded["discount"]
                     )
                   )
                 }}</TableCell>
