@@ -392,7 +392,7 @@ definePageMeta({
                   })
                 }}</TableCell>
                 <TableCell>{{ trans.user.name }}</TableCell>
-                <TableCell>{{ formatDateTime(trans.date) }}</TableCell>
+                <TableCell>{{ formatDateTime(trans.created_at) }}</TableCell>
                 <TableCell>{{ formatPrice(trans.total_price) }}</TableCell>
                 <TableCell
                   :class="[
@@ -483,7 +483,7 @@ definePageMeta({
           <DialogDescription class="font-medium text-gray-800 space-y-2">
             <div>
               Receipt Date:
-              {{ formatDateTime(transactions[selectedTransaction].date) }}
+              {{ formatDateTime(transactions[selectedTransaction].created_at) }}
             </div>
             <div>
               Cashier: {{ transactions[selectedTransaction].user.name }}

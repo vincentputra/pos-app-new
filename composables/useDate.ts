@@ -12,12 +12,21 @@ export const useDate = () => {
     start: now.subtract({ weeks: 1 }),
     end: now,
   });
+
   const formatDateTime = (date: string | Date) => {
     return new Intl.DateTimeFormat("en-US", {
       dateStyle: "medium",
       timeStyle: "short",
+      timeZone: "Asia/Jakarta",
     }).format(new Date(date));
   };
 
-  return { dateRange, formatDateTime };
+  const formatDate = (date: string | Date) => {
+    return new Intl.DateTimeFormat("en-US", {
+      dateStyle: "medium",
+      timeZone: "Asia/Jakarta",
+    }).format(new Date(date));
+  };
+
+  return { dateRange, formatDate, formatDateTime };
 };

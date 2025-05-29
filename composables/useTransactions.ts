@@ -54,6 +54,7 @@ type Transaction = {
   amount_discount: number;
   payment_status: string;
   date: string;
+  created_at: string;
   details: TransactionDetail[];
   type_reason?: string;
   reason?: string;
@@ -119,9 +120,9 @@ export const useTransactions = () => {
   ];
   const taxAmount = 10 / 100;
   const grossSalesInfo =
-    "Gross sales is calculated by adding together all sales receipts before discounts, returns, and allowances.";
+    "Gross sales are calculated by adding together all sales receipts before discounts and refunds.";
   const netSalesInfo =
-    "Net sales are calculated by deducting sales allowances, sales discounts, and sales returns from gross sales.";
+    "Net sales are calculated by deducting discounts and refunds from gross sales.";
 
   const formatNoReceipt = (payload: any) => {
     const date = new Date(payload.date ?? "");
@@ -415,7 +416,6 @@ export const useTransactions = () => {
         );
       }
 
-      console.log(data.value);
       if (!data.value?.data) {
         throw new Error("No data received from API");
       }

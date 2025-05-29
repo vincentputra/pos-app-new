@@ -82,22 +82,26 @@ const salesSummary = ref([
   },
 ]);
 
+const updateShiftData = () => {
+  cashReport.value[0].balance = shiftUser.value?.cash_balance ?? 0;
+  cashReport.value[1].balance = shiftUser.value?.cash_payments ?? 0;
+  cashReport.value[2].balance = shiftUser.value?.cash_changes ?? 0;
+  cashReport.value[3].balance = shiftUser.value?.cash_refunds ?? 0;
+  cashReport.value[4].balance = shiftUser.value?.paid_in ?? 0;
+  cashReport.value[5].balance = shiftUser.value?.paid_out ?? 0;
+  cashReport.value[6].balance = shiftUser.value?.expected_cash_balance ?? 0;
+  salesSummary.value[0].balance = shiftUser.value?.gross_sales ?? 0;
+  salesSummary.value[1].balance = shiftUser.value?.refunds ?? 0;
+  salesSummary.value[2].balance = shiftUser.value?.discounts ?? 0;
+  salesSummary.value[3].balance = shiftUser.value?.net_sales ?? 0;
+  salesSummary.value[4].balance = shiftUser.value?.tax_sales ?? 0;
+  form.amount = Number(shiftUser.value?.expected_cash_balance) ?? 0;
+};
+
 onMounted(async () => {
   nextTick(async () => {
     await initShiftUser();
-    cashReport.value[0].balance = shiftUser.value?.cash_balance ?? 0;
-    cashReport.value[1].balance = shiftUser.value?.cash_payments ?? 0;
-    cashReport.value[2].balance = shiftUser.value?.cash_changes ?? 0;
-    cashReport.value[3].balance = shiftUser.value?.cash_refunds ?? 0;
-    cashReport.value[4].balance = shiftUser.value?.paid_in ?? 0;
-    cashReport.value[5].balance = shiftUser.value?.paid_out ?? 0;
-    cashReport.value[6].balance = shiftUser.value?.expected_cash_balance ?? 0;
-    salesSummary.value[0].balance = shiftUser.value?.gross_sales ?? 0;
-    salesSummary.value[1].balance = shiftUser.value?.refunds ?? 0;
-    salesSummary.value[2].balance = shiftUser.value?.discounts ?? 0;
-    salesSummary.value[3].balance = shiftUser.value?.net_sales ?? 0;
-    salesSummary.value[4].balance = shiftUser.value?.tax_sales ?? 0;
-    form.amount = Number(shiftUser.value?.expected_cash_balance) ?? 0;
+    updateShiftData();
   });
 });
 
@@ -113,6 +117,7 @@ const handleOpenShift = async (payload: any) => {
     return;
   }
 
+  updateShiftData();
   toast.success("Open shift successfully");
 };
 

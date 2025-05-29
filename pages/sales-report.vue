@@ -36,7 +36,7 @@ const {
   calculateNetSales,
 } = useTransactions();
 const { formatPrice } = usePrice();
-const { dateRange, formatDateTime } = useDate();
+const { dateRange, formatDate } = useDate();
 
 const currentPage = ref(1);
 const itemsPerPage = ref(15);
@@ -159,7 +159,7 @@ definePageMeta({
             </template>
             <template v-else-if="reports.length">
               <TableRow v-for="trans in reports" :key="trans.id">
-                <TableCell>{{ formatDateTime(trans.date) }}</TableCell>
+                <TableCell>{{ formatDate(trans.date) }}</TableCell>
                 <TableCell>{{ formatPrice(trans.paid["subtotal"]) }}</TableCell>
                 <TableCell>{{
                   formatPrice(trans.refunded["subtotal"])
