@@ -385,9 +385,8 @@ definePageMeta({
             <Textarea id="description" v-model="form.description" />
           </div>
           <div class="space-y-2">
-            <Label for="type">Type</Label>
+            <Label>Type</Label>
             <RadioGroup
-              id="type"
               :default-value="1"
               v-model="form.type"
               :orientation="'horizontal'"

@@ -395,9 +395,9 @@ definePageMeta({
                 <TableCell>{{ formatDateTime(trans.date) }}</TableCell>
                 <TableCell>{{ formatPrice(trans.total_price) }}</TableCell>
                 <TableCell
-                  :class="
-                    trans.payment_status === statusRefund ? 'text-red-600' : ''
-                  "
+                  :class="[
+                    trans.payment_status === statusRefund ? 'text-red-600' : '',
+                  ]"
                   >{{
                     statusTransaction.find((r) => r.id === trans.payment_status)
                       ?.name
