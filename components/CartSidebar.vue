@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, onMounted, nextTick } from "vue";
+import { ref, watch, onMounted, nextTick } from "vue";
 import { Button } from "@/components/ui/button";
 import {
   Table,
@@ -203,6 +203,14 @@ const handlePrintBill = async () => {
   error.value = "";
   showPaymentDialog.value = false;
 };
+
+watch(
+  () => amountPaid.value,
+  () => {
+    calculateChange();
+  },
+  { immediate: true }
+);
 </script>
 
 <template>
@@ -335,7 +343,6 @@ const handlePrintBill = async () => {
               v-model="amountPaid"
               class="text-center"
               :placeholder="formatPrice(total)"
-              @input="calculateChange"
               required
             />
             <!-- <input
