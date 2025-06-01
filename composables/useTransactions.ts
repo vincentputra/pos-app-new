@@ -73,6 +73,8 @@ type Page = {
   user_id?: number;
   search?: string;
   date_range?: any;
+  group_by?: string;
+  year?: number;
 };
 
 export const useTransactions = () => {
@@ -96,16 +98,8 @@ export const useTransactions = () => {
   const config = useRuntimeConfig();
   const statusTransaction = ref<Status[]>([
     {
-      id: "pending",
-      name: "Pending",
-    },
-    {
       id: "paid",
       name: "Paid",
-    },
-    {
-      id: "failed",
-      name: "Failed",
     },
     {
       id: "refunded",
@@ -365,12 +359,18 @@ export const useTransactions = () => {
 
       let parameter = `page=${payload.page}&per_page=${payload.per_page}`;
       if (
-        payload.status !== undefined &&
-        payload.status !== null &&
-        payload.status !== "" &&
-        payload.status !== "all"
+        payload.group_by !== undefined &&
+        payload.group_by !== null &&
+        payload.group_by !== ""
       ) {
-        parameter = parameter + `&status=${payload.status}`;
+        parameter = parameter + `&group_by=${payload.group_by}`;
+      }
+      if (
+        payload.year !== undefined &&
+        payload.year !== null &&
+        Number(payload.year) !== 0
+      ) {
+        parameter = parameter + `&year=${payload.year}`;
       }
       if (
         payload.user_id !== undefined &&

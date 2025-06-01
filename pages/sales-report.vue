@@ -40,7 +40,6 @@ const { dateRange, formatDate } = useDate();
 
 const currentPage = ref(1);
 const itemsPerPage = ref(15);
-const selectedStatus = ref("all");
 const selectedUser = ref(0);
 
 const handlePageChange = async (page: number) => {
@@ -48,7 +47,6 @@ const handlePageChange = async (page: number) => {
   await fetchReports({
     page: currentPage.value,
     per_page: itemsPerPage.value,
-    status: selectedStatus.value,
     user_id: selectedUser.value,
     date_range: dateRange.value,
   });
@@ -94,7 +92,6 @@ definePageMeta({
               fetchReports({
                 page: currentPage,
                 per_page: itemsPerPage,
-                status: selectedStatus,
                 user_id: selectedUser,
                 date_range: dateRange,
               })

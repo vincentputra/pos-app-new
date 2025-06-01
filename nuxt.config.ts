@@ -19,7 +19,13 @@ export default defineNuxtConfig({
       enabled: true,
     },
   },
-  modules: ["@nuxt/ui", "shadcn-nuxt", "@nuxtjs/color-mode", "@pinia/nuxt"],
+  modules: [
+    "@nuxt/ui",
+    "shadcn-nuxt",
+    "@nuxtjs/color-mode",
+    "@pinia/nuxt",
+    "nuxt-charts",
+  ],
   css: ["~/assets/css/tailwind.css"],
   vite: {
     plugins: [tailwindcss()],
