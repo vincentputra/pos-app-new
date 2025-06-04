@@ -11,7 +11,7 @@ import {
 } from "@/components/ui/table";
 import {
   Dialog,
-  DialogContent,
+  DialogScrollContent,
   DialogFooter,
   DialogHeader,
   DialogTitle,
@@ -102,6 +102,26 @@ const salesSummary = ref([
     title: "Tax Sales",
     balance: 0,
   },
+  {
+    title: "Total Tendered",
+    balance: 0,
+  },
+  {
+    title: "Bank Transfer",
+    balance: 0,
+  },
+  {
+    title: "E-Wallet",
+    balance: 0,
+  },
+  {
+    title: "QRIS",
+    balance: 0,
+  },
+  {
+    title: "Cash",
+    balance: 0,
+  },
 ]);
 
 const handlePageChange = async (page: number) => {
@@ -146,6 +166,11 @@ const openDetailModal = async (id: number) => {
   salesSummary.value[2].balance = shiftDetail.value?.discounts ?? 0;
   salesSummary.value[3].balance = shiftDetail.value?.net_sales ?? 0;
   salesSummary.value[4].balance = shiftDetail.value?.tax_sales ?? 0;
+  salesSummary.value[5].balance = shiftDetail.value?.total_tendered ?? 0;
+  salesSummary.value[6].balance = shiftDetail.value?.bank_transfer_total ?? 0;
+  salesSummary.value[7].balance = shiftDetail.value?.ewallet_total ?? 0;
+  salesSummary.value[8].balance = shiftDetail.value?.qris_total ?? 0;
+  salesSummary.value[9].balance = shiftDetail.value?.cash_total ?? 0;
   isModalOpen.value = true;
 };
 
@@ -156,7 +181,7 @@ definePageMeta({
 </script>
 
 <template>
-  <div class="flex h-full w-full flex-1 flex-col">
+  <div class="flex h-full w-full flex-1 flex-col overflow-hidden">
     <header class="flex-none border-b border-gray-200 p-4">
       <div class="flex items-center justify-between">
         <h1 class="text-2xl font-semibold text-gray-800">Shifts Report</h1>
@@ -280,7 +305,7 @@ definePageMeta({
 
     <!-- Detail Modal -->
     <Dialog :open="isModalOpen" @update:open="isModalOpen = false">
-      <DialogContent>
+      <DialogScrollContent class="sm:max-w-[600px]">
         <DialogHeader>
           <DialogTitle class="mb-4">Shift Report</DialogTitle>
           <DialogDescription class="font-medium text-gray-800 space-y-2">
@@ -307,8 +332,11 @@ definePageMeta({
               </TableRow>
             </TableHeader>
             <TableBody>
-              <TableRow v-for="cash in cashReport">
-                <TableCell class="font-medium">
+              <TableRow
+                v-for="(cash, index) in cashReport"
+                :class="[index == 7 ? 'font-extrabold' : 'font-medium']"
+              >
+                <TableCell>
                   {{ cash.title }}
                 </TableCell>
                 <TableCell>{{ formatPrice(cash.balance) }}</TableCell>
@@ -324,11 +352,16 @@ definePageMeta({
               </TableRow>
             </TableHeader>
             <TableBody>
-              <TableRow v-for="cash in salesSummary">
-                <TableCell class="font-medium">
-                  {{ cash.title }}
+              <TableRow
+                v-for="(sales, index) in salesSummary"
+                :class="[
+                  [0, 3, 5].includes(index) ? 'font-extrabold' : 'font-medium',
+                ]"
+              >
+                <TableCell>
+                  {{ sales.title }}
                 </TableCell>
-                <TableCell>{{ formatPrice(cash.balance) }}</TableCell>
+                <TableCell>{{ formatPrice(sales.balance) }}</TableCell>
               </TableRow>
             </TableBody>
           </Table>
@@ -338,7 +371,7 @@ definePageMeta({
             Close
           </Button>
         </DialogFooter>
-      </DialogContent>
+      </DialogScrollContent>
     </Dialog>
   </div>
 </template>

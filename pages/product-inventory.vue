@@ -258,7 +258,7 @@ definePageMeta({
 </script>
 
 <template>
-  <div class="flex h-full w-full flex-1 flex-col">
+  <div class="flex h-full w-full flex-1 flex-col overflow-hidden">
     <header class="flex-none border-b border-gray-200 p-4">
       <div class="flex items-center justify-between">
         <h1 class="text-2xl font-semibold text-gray-800">Product Inventory</h1>

@@ -277,7 +277,7 @@ onMounted(async () => {
       </SidebarFooter>
       <SidebarRail />
     </Sidebar>
-    <SidebarInset class="flex-row">
+    <SidebarInset class="flex-row overflow-hidden">
       <header
         class="flex h-full shrink-0 items-start border-r p-4 transition-[width,height] ease-linear group-has-[[data-collapsible=icon]]/sidebar-wrapper:h-12"
       >

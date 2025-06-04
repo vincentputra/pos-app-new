@@ -37,6 +37,11 @@ type ShiftDetail = {
   tax_sales: number;
   net_sales: number;
   final_cash_balance: number;
+  total_tendered: number;
+  bank_transfer_total: number;
+  ewallet_total: number;
+  qris_total: number;
+  cash_total: number;
   created_at: string;
   updated_at: string;
   user: {

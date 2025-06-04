@@ -70,6 +70,7 @@ type Page = {
   page: number;
   per_page: number;
   status?: string;
+  payment_method?: string;
   user_id?: number;
   search?: string;
   date_range?: any;
@@ -123,7 +124,8 @@ export const useTransactions = () => {
     const year = date.getFullYear();
     const month = String(date.getMonth() + 1).padStart(2, "0");
     const day = String(date.getDate()).padStart(2, "0");
-    return "CS/" + payload.user + "/" + year + month + day + "/00" + payload.id;
+    //return "CS/" + payload.user + "/" + year + month + day + "/00" + payload.id;
+    return year + "-" + month + "-" + day + "/" + payload.id;
   };
 
   const calculateDiscount = (
@@ -281,6 +283,14 @@ export const useTransactions = () => {
         payload.status !== "all"
       ) {
         parameter = parameter + `&status=${payload.status}`;
+      }
+      if (
+        payload.payment_method !== undefined &&
+        payload.payment_method !== null &&
+        payload.payment_method !== "" &&
+        payload.payment_method !== "all"
+      ) {
+        parameter = parameter + `&payment_method=${payload.payment_method}`;
       }
       if (
         payload.user_id !== undefined &&

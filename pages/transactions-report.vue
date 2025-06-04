@@ -13,6 +13,7 @@ import {
 } from "@/components/ui/table";
 import {
   Dialog,
+  DialogScrollContent,
   DialogContent,
   DialogFooter,
   DialogHeader,
@@ -56,6 +57,7 @@ const { dateRange, formatDateTime } = useDate();
 const currentPage = ref(1);
 const itemsPerPage = ref(15);
 const selectedStatus = ref("all");
+const selectedPaymentMethod = ref("all");
 const selectedUser = ref(0);
 const search = ref("");
 const selectedTransaction = ref(0);
@@ -110,6 +112,7 @@ const handlePageChange = async (page: number) => {
     page: currentPage.value,
     per_page: itemsPerPage.value,
     status: selectedStatus.value,
+    payment_method: selectedPaymentMethod.value,
     user_id: selectedUser.value,
     search: search.value,
     date_range: dateRange.value,
@@ -128,6 +131,11 @@ const filterByUser = async (payload: any) => {
 
 const filterByStatus = async (payload: any) => {
   selectedStatus.value = payload;
+  await handlePageChange(1);
+};
+
+const filterByMethod = async (payload: any) => {
+  selectedPaymentMethod.value = payload;
   await handlePageChange(1);
 };
 
@@ -326,7 +334,7 @@ definePageMeta({
 </script>
 
 <template>
-  <div class="flex h-full w-full flex-1 flex-col">
+  <div class="flex h-full w-full flex-1 flex-col overflow-hidden">
     <header class="flex-none border-b border-gray-200 p-4">
       <div class="flex items-center justify-between">
         <h1 class="text-2xl font-semibold text-gray-800">
@@ -342,6 +350,7 @@ definePageMeta({
                 page: currentPage,
                 per_page: itemsPerPage,
                 status: selectedStatus,
+                payment_method: selectedPaymentMethod,
                 user_id: selectedUser,
                 search: search,
                 date_range: dateRange,
@@ -359,6 +368,7 @@ definePageMeta({
       <div class="mb-4 flex items-center gap-4">
         <FilterByCashier @user-change="filterByUser" v-if="user?.role !== 1" />
         <FilterByStatusTrans @status-change="filterByStatus" />
+        <FilterByPaymentMethod @method-change="filterByMethod" />
         <FilterByDate @date-change="filterByDate" />
         <!-- <FilterBySearch @search-filter="filterBySearch" /> -->
       </div>
@@ -371,6 +381,7 @@ definePageMeta({
               <TableHead>Date</TableHead>
               <TableHead>Total</TableHead>
               <TableHead>Status</TableHead>
+              <TableHead>Payment Method</TableHead>
               <TableHead>Actions</TableHead>
             </TableRow>
           </TableHeader>
@@ -403,6 +414,10 @@ definePageMeta({
                       ?.name
                   }}</TableCell
                 >
+                <TableCell>{{
+                  paymentMethods.find((r) => r.id === trans.payment_method)
+                    ?.name
+                }}</TableCell>
                 <TableCell>
                   <div class="flex gap-2">
                     <Button
@@ -469,7 +484,7 @@ definePageMeta({
     </div>
 
     <Dialog :open="isModalOpen" @update:open="isModalOpen = false">
-      <DialogContent v-if="!isDeleted">
+      <DialogScrollContent v-if="!isDeleted">
         <DialogHeader>
           <DialogTitle class="mb-4">
             {{
@@ -695,7 +710,7 @@ definePageMeta({
             {{ isProcessing ? "Processing..." : "Confirm Refund" }}
           </Button>
         </DialogFooter>
-      </DialogContent>
+      </DialogScrollContent>
       <DialogContent v-else>
         <DialogHeader>
           <DialogTitle>Are you absolutely sure?</DialogTitle>

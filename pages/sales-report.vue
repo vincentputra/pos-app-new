@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { ref, onMounted, nextTick } from "vue";
 import { Button } from "@/components/ui/button";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
   Table,
   TableBody,
@@ -79,7 +80,7 @@ definePageMeta({
 </script>
 
 <template>
-  <div class="flex h-full w-full flex-1 flex-col">
+  <div class="flex h-full w-full flex-1 flex-col overflow-hidden">
     <header class="flex-none border-b border-gray-200 p-4">
       <div class="flex items-center justify-between">
         <h1 class="text-2xl font-semibold text-gray-800">Sales Report</h1>
@@ -109,79 +110,139 @@ definePageMeta({
         <FilterByCashier @user-change="filterByUser" v-if="user?.role !== 1" />
         <FilterByDate @date-change="filterByDate" />
       </div>
-      <div class="rounded-lg border shadow-sm">
-        <Table>
-          <TableHeader>
-            <TableRow>
-              <TableHead>Date</TableHead>
-              <TableHead class="flex items-center">
-                Gross Sales
-                <TooltipProvider>
-                  <Tooltip>
-                    <TooltipTrigger as-child>
-                      <Info class="w-4 h-4 ml-2" />
-                    </TooltipTrigger>
-                    <TooltipContent>
-                      {{ grossSalesInfo }}
-                    </TooltipContent>
-                  </Tooltip>
-                </TooltipProvider>
-              </TableHead>
-              <TableHead>Refunds</TableHead>
-              <TableHead>Discounts</TableHead>
-              <TableHead class="flex items-center">
-                Net Sales
-                <TooltipProvider>
-                  <Tooltip>
-                    <TooltipTrigger as-child>
-                      <Info class="w-4 h-4 ml-2" />
-                    </TooltipTrigger>
-                    <TooltipContent>
-                      {{ netSalesInfo }}
-                    </TooltipContent>
-                  </Tooltip>
-                </TooltipProvider>
-              </TableHead>
-              <TableHead>Paid Transactions</TableHead>
-              <TableHead>Refunded Transactions</TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            <template v-if="isLoading">
-              <TableRow v-for="n in pageTransaction.total ?? 5" :key="n">
-                <TableCell v-for="m in 5" :key="m">
-                  <div class="h-4 w-24 animate-pulse rounded bg-gray-100" />
-                </TableCell>
-              </TableRow>
-            </template>
-            <template v-else-if="reports.length">
-              <TableRow v-for="trans in reports" :key="trans.id">
-                <TableCell>{{ formatDate(trans.date) }}</TableCell>
-                <TableCell>{{ formatPrice(trans.paid["subtotal"]) }}</TableCell>
-                <TableCell>{{
-                  formatPrice(trans.refunded["subtotal"])
-                }}</TableCell>
-                <TableCell>{{
-                  formatPrice(
-                    trans.paid["discount"] - trans.refunded["discount"]
-                  )
-                }}</TableCell>
-                <TableCell>{{
-                  formatPrice(
-                    calculateNetSales(
-                      trans.paid["subtotal"],
-                      trans.refunded["subtotal"],
-                      trans.paid["discount"] - trans.refunded["discount"]
-                    )
-                  )
-                }}</TableCell>
-                <TableCell>{{ trans.paid_transactions }}</TableCell>
-                <TableCell>{{ trans.refunded_transactions }}</TableCell>
-              </TableRow>
-            </template>
-          </TableBody>
-        </Table>
-      </div>
+      <Tabs default-value="sales-summary">
+        <TabsList class="grid w-full grid-cols-2">
+          <TabsTrigger value="sales-summary"> Sales Summary </TabsTrigger>
+          <TabsTrigger value="payment-method"> Payment Methods </TabsTrigger>
+        </TabsList>
+        <TabsContent value="sales-summary">
+          <div class="rounded-lg border shadow-sm">
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>Date</TableHead>
+                  <TableHead class="flex items-center">
+                    Gross Sales
+                    <TooltipProvider>
+                      <Tooltip>
+                        <TooltipTrigger as-child>
+                          <Info class="w-4 h-4 ml-2" />
+                        </TooltipTrigger>
+                        <TooltipContent>
+                          {{ grossSalesInfo }}
+                        </TooltipContent>
+                      </Tooltip>
+                    </TooltipProvider>
+                  </TableHead>
+                  <TableHead>Refunds</TableHead>
+                  <TableHead>Discounts</TableHead>
+                  <TableHead class="flex items-center">
+                    Net Sales
+                    <TooltipProvider>
+                      <Tooltip>
+                        <TooltipTrigger as-child>
+                          <Info class="w-4 h-4 ml-2" />
+                        </TooltipTrigger>
+                        <TooltipContent>
+                          {{ netSalesInfo }}
+                        </TooltipContent>
+                      </Tooltip>
+                    </TooltipProvider>
+                  </TableHead>
+                  <TableHead>Paid Transactions</TableHead>
+                  <TableHead>Refunded Transactions</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                <template v-if="isLoading">
+                  <TableRow v-for="n in pageTransaction.total ?? 5" :key="n">
+                    <TableCell v-for="m in 5" :key="m">
+                      <div class="h-4 w-24 animate-pulse rounded bg-gray-100" />
+                    </TableCell>
+                  </TableRow>
+                </template>
+                <template v-else-if="reports.length">
+                  <TableRow v-for="trans in reports" :key="trans.id">
+                    <TableCell>{{ formatDate(trans.date) }}</TableCell>
+                    <TableCell>{{
+                      formatPrice(trans.paid["subtotal"])
+                    }}</TableCell>
+                    <TableCell>{{
+                      formatPrice(trans.refunded["subtotal"])
+                    }}</TableCell>
+                    <TableCell>{{
+                      formatPrice(
+                        trans.paid["discount"] - trans.refunded["discount"]
+                      )
+                    }}</TableCell>
+                    <TableCell>{{
+                      formatPrice(
+                        calculateNetSales(
+                          trans.paid["subtotal"],
+                          trans.refunded["subtotal"],
+                          trans.paid["discount"] - trans.refunded["discount"]
+                        )
+                      )
+                    }}</TableCell>
+                    <TableCell>{{ trans.paid_transactions }}</TableCell>
+                    <TableCell>{{ trans.refunded_transactions }}</TableCell>
+                  </TableRow>
+                </template>
+              </TableBody>
+            </Table>
+          </div>
+        </TabsContent>
+        <TabsContent value="payment-method">
+          <div class="rounded-lg border shadow-sm">
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>Date</TableHead>
+                  <TableHead>Total Tendered</TableHead>
+                  <TableHead>Bank Transfer</TableHead>
+                  <TableHead>E-Wallet</TableHead>
+                  <TableHead>QRIS</TableHead>
+                  <TableHead>Cash</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                <template v-if="isLoading">
+                  <TableRow v-for="n in pageTransaction.total ?? 5" :key="n">
+                    <TableCell v-for="m in 5" :key="m">
+                      <div class="h-4 w-24 animate-pulse rounded bg-gray-100" />
+                    </TableCell>
+                  </TableRow>
+                </template>
+                <template v-else-if="reports.length">
+                  <TableRow v-for="trans in reports" :key="trans.id">
+                    <TableCell>{{ formatDate(trans.date) }}</TableCell>
+                    <TableCell>{{
+                      formatPrice(trans.paid["total"] - trans.refunded["total"])
+                    }}</TableCell>
+                    <TableCell>{{
+                      formatPrice(
+                        trans.paid["bank_transfer"] -
+                          trans.refunded["bank_transfer"]
+                      )
+                    }}</TableCell>
+                    <TableCell>{{
+                      formatPrice(
+                        trans.paid["ewallet"] - trans.refunded["ewallet"]
+                      )
+                    }}</TableCell>
+                    <TableCell>{{
+                      formatPrice(trans.paid["qris"] - trans.refunded["qris"])
+                    }}</TableCell>
+                    <TableCell>{{
+                      formatPrice(trans.paid["cash"] - trans.refunded["cash"])
+                    }}</TableCell>
+                  </TableRow>
+                </template>
+              </TableBody>
+            </Table>
+          </div>
+        </TabsContent>
+      </Tabs>
 
       <Pagination
         v-slot="{ page }"
