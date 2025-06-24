@@ -106,7 +106,7 @@ definePageMeta({
     </header>
 
     <div class="min-h-0 flex-1 p-4">
-      <div class="mb-4 flex items-center gap-4">
+      <div class="sm:flex items-center gap-4">
         <FilterByCashier @user-change="filterByUser" v-if="user?.role !== 1" />
         <FilterByDate @date-change="filterByDate" />
       </div>

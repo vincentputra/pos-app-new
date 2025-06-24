@@ -177,8 +177,8 @@ definePageMeta({
 </script>
 
 <template>
-  <div class="flex flex-1 flex-col gap-4 p-4">
-    <div class="flex items-center">
+  <div class="flex flex-1 flex-col w-[calc(100%-200px)] gap-4 p-4">
+    <div class="sm:flex items-center gap-4">
       <FilterByYear @year-change="filterByYear" />
     </div>
     <div class="grid auto-rows-min gap-4 lg:grid-cols-2 xl:grid-cols-3">

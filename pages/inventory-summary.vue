@@ -120,9 +120,9 @@ definePageMeta({
 <template>
   <div class="flex h-full w-full flex-1 flex-col overflow-hidden">
     <header class="flex-none border-b border-gray-200 p-4">
-      <div class="flex items-center justify-between">
+      <div class="sm:flex items-center justify-between">
         <h1 class="text-2xl font-semibold text-gray-800">Inventory Summary</h1>
-        <div class="flex items-center gap-2">
+        <div class="flex items-center gap-2 pt-4 sm:pt-0">
           <Button
             type="button"
             variant="ghost"
@@ -145,7 +145,7 @@ definePageMeta({
     </header>
 
     <div class="min-h-0 flex-1 p-4">
-      <div class="mb-4 flex items-center gap-4">
+      <div class="sm:flex items-center gap-4">
         <FilterByCashier @user-change="filterByUser" />
         <FilterBySearch @search-filter="filterBySearch" />
       </div>

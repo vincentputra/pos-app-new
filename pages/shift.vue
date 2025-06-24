@@ -147,16 +147,16 @@ definePageMeta({
 </script>
 
 <template>
-  <div class="flex h-full w-full flex-1 flex-col">
+  <div class="flex h-full w-[calc(100%-200px)] flex-1 flex-col">
     <ShiftCashier v-if="!isTheShiftOpen" @open-shift="handleOpenShift" />
 
     <div v-else>
       <header class="flex-none border-b border-gray-200 p-4">
-        <div class="flex items-center justify-between">
+        <div class="sm:flex items-center justify-between">
           <h1 class="text-2xl font-semibold text-gray-800">
             Shift {{ shiftUser?.user.name }}
           </h1>
-          <div class="flex items-center gap-2">
+          <div class="flex items-center gap-2 justify-between pt-4 sm:pt-0">
             <NuxtLink to="/cash-management">
               <Button type="button" variant="ghost" size="sm">
                 <BookPlus class="mr-2 h-4 w-4" />

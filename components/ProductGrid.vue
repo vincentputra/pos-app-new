@@ -67,7 +67,7 @@ const addToCart = (product: any) => {
   <div class="flex flex-col h-screen overflow-auto p-6 md:w-3/5 xl:w-3/4">
     <div class="mb-4 flex items-center gap-4">
       <FilterBySearch @search-filter="filterBySearch" />
-      <SheetTrigger as-child class="visible md:invisible">
+      <SheetTrigger as-child class="visible md:invisible mb-4">
         <Button variant="outline">
           <ShoppingCart class="mr-2 h-4 w-4" />
         </Button>

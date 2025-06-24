@@ -17,5 +17,5 @@ watch(text, (newValue) => {
 </script>
 
 <template>
-  <Input class="max-w-sm" v-model="text" placeholder="Search" />
+  <Input class="max-w-sm mb-4" v-model="text" placeholder="Search" />
 </template>

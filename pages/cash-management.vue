@@ -118,9 +118,9 @@ definePageMeta({
 <template>
   <div class="flex h-full w-full flex-1 flex-col overflow-hidden">
     <header class="flex-none border-b border-gray-200 p-4">
-      <div class="flex items-center justify-between">
+      <div class="xs:flex items-center justify-between">
         <h1 class="text-2xl font-semibold text-gray-800">Cash Management</h1>
-        <div class="flex items-center gap-2">
+        <div class="flex items-center gap-2 pt-4 sm:pt-0">
           <Button type="button" size="sm" @click="openShiftModal">
             <BookPlus class="mr-2 h-4 w-4" />
             Add Cash Report

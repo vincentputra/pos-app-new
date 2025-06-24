@@ -56,7 +56,7 @@ watch(
         variant="outline"
         :class="
           cn(
-            'w-[280px] justify-start text-left font-normal',
+            'w-full sm:w-[280px] mb-4 justify-start text-left font-normal',
             !value && 'text-muted-foreground'
           )
         "

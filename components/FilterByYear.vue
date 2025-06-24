@@ -31,7 +31,7 @@ watch(selectedYear, (newValue) => {
 
 <template>
   <Select v-model="selectedYear">
-    <SelectTrigger class="w-[180px]">
+    <SelectTrigger class="w-full md:w-[180px]">
       <SelectValue placeholder="Select a year" />
     </SelectTrigger>
     <SelectContent class="h-[300px]" position="popper" :side-offset="5">

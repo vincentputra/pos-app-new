@@ -199,7 +199,7 @@ definePageMeta({
 </script>
 
 <template>
-  <div class="flex h-full w-full flex-1 flex-col">
+  <div class="flex h-full w-[calc(100%-200px)] flex-1 flex-col">
     <header class="flex-none border-b border-gray-200 p-4">
       <h1 class="text-2xl font-semibold text-gray-800">Create Adjustment</h1>
     </header>
@@ -213,9 +213,12 @@ definePageMeta({
       </div>
       <Card class="mx-auto w-full max-w-3xl overflow-y-auto">
         <form @submit.prevent="handleAdjustmentSubmit">
-          <CardContent>
+          <CardContent class="px-0">
             <div class="grid items-center w-full gap-4 mb-4">
-              <div class="flex flex-col space-y-1.5" v-if="user?.role !== 1">
+              <div
+                class="flex flex-col space-y-1.5 px-4"
+                v-if="user?.role !== 1"
+              >
                 <Label>Employee / Cashier</Label>
                 <Select id="user" v-model="selectedUser">
                   <SelectTrigger class="w-full">
@@ -233,11 +236,11 @@ definePageMeta({
                   </SelectContent>
                 </Select>
               </div>
-              <div class="flex flex-col space-y-1.5">
+              <div class="flex flex-col space-y-1.5 px-4">
                 <Label for="note">Note</Label>
                 <Textarea id="note" v-model="form.note" />
               </div>
-              <div class="flex flex-col space-y-1.5">
+              <div class="flex flex-col space-y-1.5 px-4">
                 <Label for="image">Image</Label>
                 <Input
                   id="image"
@@ -249,7 +252,7 @@ definePageMeta({
                   {{ form.image?.name || "No file selected" }}
                 </p>
               </div>
-              <div class="flex flex-col space-y-1.5">
+              <div class="flex flex-col space-y-1.5 px-4">
                 <Label>Adjustment Stock Table</Label>
                 <div class="rounded-lg border shadow-sm">
                   <Table>
@@ -298,12 +301,12 @@ definePageMeta({
                   </Table>
                 </div>
               </div>
-              <div v-if="error" class="mt-2 text-sm text-red-600">
+              <div v-if="error" class="mt-2 text-sm text-red-600 px-4">
                 {{ error }}
               </div>
             </div>
           </CardContent>
-          <CardFooter>
+          <CardFooter class="px-4">
             <Button class="w-full" type="submit">Create</Button>
           </CardFooter>
         </form>
@@ -318,10 +321,10 @@ definePageMeta({
             Add product to adjustment table
           </DialogDescription>
         </DialogHeader>
-        <div class="mt-4 mb-4 flex items-center gap-4">
+        <div class="mt-4 sm:flex items-center gap-4">
           <FilterBySearch @search-filter="filterBySearch" />
           <Select v-model="selectedStockStatus">
-            <SelectTrigger class="w-[180px]">
+            <SelectTrigger class="w-full md:w-[180px] mb-4">
               <SelectValue placeholder="Select a stock status" />
             </SelectTrigger>
             <SelectContent>

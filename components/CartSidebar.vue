@@ -401,7 +401,7 @@ watch(
             Choose a discount to apply to your cart.
           </DialogDescription>
         </DialogHeader>
-        <div class="mt-4 mb-4 flex items-center gap-4">
+        <div class="sm:flex items-center gap-4 mt-4">
           <FilterByDiscountType @type-change="filterByDiscountType" />
           <FilterBySearch @search-filter="filterBySearch" />
         </div>

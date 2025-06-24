@@ -30,7 +30,7 @@ onMounted(async () => {
 
 <template>
   <Select v-model="selectedUser">
-    <SelectTrigger class="w-[180px]">
+    <SelectTrigger class="w-full md:w-[180px] mb-4">
       <SelectValue placeholder="Select a cashier" />
     </SelectTrigger>
     <SelectContent>

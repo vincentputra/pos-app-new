@@ -24,7 +24,7 @@ watch(selectedStatusTrans, (newValue) => {
 
 <template>
   <Select v-model="selectedStatusTrans">
-    <SelectTrigger class="w-[180px]">
+    <SelectTrigger class="w-full md:w-[180px] mb-4">
       <SelectValue placeholder="Select a status" />
     </SelectTrigger>
     <SelectContent>
