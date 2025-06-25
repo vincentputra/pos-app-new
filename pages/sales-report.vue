@@ -42,6 +42,8 @@ const { dateRange, formatDate } = useDate();
 const currentPage = ref(1);
 const itemsPerPage = ref(15);
 const selectedUser = ref(0);
+const selectedTransaction = ref(0);
+const isModalOpen = ref(false);
 
 const handlePageChange = async (page: number) => {
   currentPage.value = page;
@@ -61,6 +63,11 @@ const filterByUser = async (payload: any) => {
 const filterByDate = async (payload: any) => {
   dateRange.value = payload;
   await handlePageChange(1);
+};
+
+const openProductModal = async (id: number) => {
+  selectedTransaction.value = id;
+  isModalOpen.value = true;
 };
 
 onMounted(() => {
@@ -151,6 +158,7 @@ definePageMeta({
                   </TableHead>
                   <TableHead>Paid Transactions</TableHead>
                   <TableHead>Refunded Transactions</TableHead>
+                  <TableHead>Actions</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -162,7 +170,7 @@ definePageMeta({
                   </TableRow>
                 </template>
                 <template v-else-if="reports.length">
-                  <TableRow v-for="trans in reports" :key="trans.id">
+                  <TableRow v-for="(trans, index) in reports" :key="trans.id">
                     <TableCell>{{ formatDate(trans.date) }}</TableCell>
                     <TableCell>{{
                       formatPrice(trans.paid["subtotal"])
@@ -186,6 +194,17 @@ definePageMeta({
                     }}</TableCell>
                     <TableCell>{{ trans.paid_transactions }}</TableCell>
                     <TableCell>{{ trans.refunded_transactions }}</TableCell>
+                    <TableCell>
+                      <div class="flex gap-2">
+                        <Button
+                          type="button"
+                          size="sm"
+                          @click="openProductModal(index)"
+                        >
+                          Products
+                        </Button>
+                      </div>
+                    </TableCell>
                   </TableRow>
                 </template>
               </TableBody>
@@ -273,5 +292,85 @@ definePageMeta({
         </PaginationContent>
       </Pagination>
     </div>
+
+    <!-- Detail Modal -->
+    <Dialog :open="isModalOpen" @update:open="isModalOpen = false">
+      <DialogScrollContent class="sm:max-w-[600px]">
+        <DialogHeader>
+          <DialogTitle class="mb-4">Sales Report</DialogTitle>
+          <DialogDescription class="font-medium text-gray-800 space-y-2">
+            <div>
+              Date:
+              {{ formatDate(reports[selectedTransaction].date) }}
+            </div>
+            <div>
+              Gross Sales:
+              {{ formatPrice(reports[selectedTransaction].paid["subtotal"]) }}
+            </div>
+            <div>
+              Refunds:
+              {{
+                formatPrice(reports[selectedTransaction].refunded["subtotal"])
+              }}
+            </div>
+            <div>
+              Discounts:
+              {{
+                formatPrice(
+                  reports[selectedTransaction].paid["discount"] -
+                    reports[selectedTransaction].refunded["discount"]
+                )
+              }}
+            </div>
+            <div>
+              Net Sales:
+              {{
+                formatPrice(
+                  calculateNetSales(
+                    reports[selectedTransaction].paid["subtotal"],
+                    reports[selectedTransaction].refunded["subtotal"],
+                    reports[selectedTransaction].paid["discount"] -
+                      reports[selectedTransaction].refunded["discount"]
+                  )
+                )
+              }}
+            </div>
+            <div>
+              Paid Transactions:
+              {{ reports[selectedTransaction].paid_transactions }}
+            </div>
+            <div>
+              Refunded Transactions:
+              {{ reports[selectedTransaction].refunded_transactions }}
+            </div>
+          </DialogDescription>
+        </DialogHeader>
+        <div class="rounded-lg border shadow-sm">
+          <Table v-if="reports[selectedTransaction].products.length > 0">
+            <TableHeader>
+              <TableRow>
+                <TableHead class="w-[150px]">Product</TableHead>
+                <TableHead>Sold Quantity</TableHead>
+                <TableHead>Refunded Quantity</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              <TableRow
+                v-for="product in reports[selectedTransaction].products"
+              >
+                <TableCell>{{ product.name }}</TableCell>
+                <TableCell>{{ product.sold_quantity }}</TableCell>
+                <TableCell>{{ product.refunded_quantity }}</TableCell>
+              </TableRow>
+            </TableBody>
+          </Table>
+        </div>
+        <DialogFooter>
+          <Button type="button" variant="ghost" @click="isModalOpen = false">
+            Close
+          </Button>
+        </DialogFooter>
+      </DialogScrollContent>
+    </Dialog>
   </div>
 </template>

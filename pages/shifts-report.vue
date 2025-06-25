@@ -236,7 +236,10 @@ definePageMeta({
               <TableRow v-for="shift in shifts" :key="shift.id">
                 <TableCell>{{ shift.user.name }}</TableCell>
                 <TableCell>{{ formatDateTime(shift.created_at) }}</TableCell>
-                <TableCell>{{ formatDateTime(shift.updated_at) }}</TableCell>
+                <TableCell v-if="shift.updated_at">{{
+                  formatDateTime(shift.updated_at)
+                }}</TableCell>
+                <TableCell v-else></TableCell>
                 <TableCell>{{
                   formatPrice(shift.expected_cash_balance)
                 }}</TableCell>
@@ -362,6 +365,23 @@ definePageMeta({
                   {{ sales.title }}
                 </TableCell>
                 <TableCell>{{ formatPrice(sales.balance) }}</TableCell>
+              </TableRow>
+            </TableBody>
+          </Table>
+
+          <Table class="mt-4" v-if="shiftDetail.products.length > 0">
+            <TableHeader>
+              <TableRow>
+                <TableHead class="w-[150px]">Product</TableHead>
+                <TableHead>Sold Quantity</TableHead>
+                <TableHead>Refunded Quantity</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              <TableRow v-for="product in shiftDetail.products">
+                <TableCell>{{ product.name }}</TableCell>
+                <TableCell>{{ product.sold_quantity }}</TableCell>
+                <TableCell>{{ product.refunded_quantity }}</TableCell>
               </TableRow>
             </TableBody>
           </Table>

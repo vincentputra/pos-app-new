@@ -52,6 +52,14 @@ type ShiftDetail = {
     created_at: string;
     updated_at: string;
   };
+  products: {
+    id: number;
+    name: string;
+    price: number;
+    sold_quantity: number;
+    refunded_quantity: number;
+    total_sales: number;
+  }[];
 };
 
 type ShiftHistory = {
