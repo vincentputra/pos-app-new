@@ -93,6 +93,7 @@ export const useTransactions = () => {
     total: 0,
   });
   const reports = ref<any[]>([]);
+  const reportsTotal = ref<any[]>([]);
   const isLoading = ref(false);
   const error = ref<string | null>(null);
   const storage = useStorage();
@@ -405,8 +406,10 @@ export const useTransactions = () => {
           parameter +
           `&date_from=${payload.date_range.start.toString()}&date_to=${payload.date_range.end.toString()}`;
       }
+      console.log(parameter);
       const { data, error } = await useFetch<{
         data: any[];
+        totals: any[];
         meta: {
           current_page: number;
           last_page: number;
@@ -431,6 +434,7 @@ export const useTransactions = () => {
       }
 
       reports.value = data.value.data;
+      reportsTotal.value = data.value.totals;
       pageTransaction.value = data.value.meta;
     } catch (e) {
       error.value =
@@ -447,6 +451,7 @@ export const useTransactions = () => {
     transactionDetail,
     pageTransaction,
     reports,
+    reportsTotal,
     paymentMethods,
     taxAmount,
     grossSalesInfo,

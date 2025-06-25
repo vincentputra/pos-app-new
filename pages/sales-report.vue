@@ -29,6 +29,7 @@ import { useDate } from "@/composables/useDate";
 const { user, initAuth } = useAuth();
 const {
   reports,
+  reportsTotal,
   pageTransaction,
   grossSalesInfo,
   netSalesInfo,
@@ -123,6 +124,76 @@ definePageMeta({
           <TabsTrigger value="payment-method"> Payment Methods </TabsTrigger>
         </TabsList>
         <TabsContent value="sales-summary">
+          <div
+            class="grid auto-rows-min gap-4 lg:grid-cols-2 xl:grid-cols-3 mb-4"
+          >
+            <UCard>
+              <p class="mb-1 text-(--ui-text-dimmed)">Total Gross Sales</p>
+              <div class="flex items-center justify-between">
+                <h2 class="text-2xl font-medium">
+                  {{ formatPrice(reportsTotal.paid?.subtotal) }}
+                </h2>
+              </div>
+            </UCard>
+            <UCard>
+              <p class="mb-1 text-(--ui-text-dimmed)">Total Refunds</p>
+              <div class="flex items-center justify-between">
+                <h2 class="text-2xl font-medium">
+                  {{ formatPrice(reportsTotal.refunded?.subtotal) }}
+                </h2>
+              </div>
+            </UCard>
+            <UCard>
+              <p class="mb-1 text-(--ui-text-dimmed)">Total Discounts</p>
+              <div class="flex items-center justify-between">
+                <h2 class="text-2xl font-medium">
+                  {{
+                    formatPrice(
+                      reportsTotal.paid?.discount -
+                        reportsTotal.refunded?.discount
+                    )
+                  }}
+                </h2>
+              </div>
+            </UCard>
+            <UCard>
+              <p class="mb-1 text-(--ui-text-dimmed)">Total Net Sales</p>
+              <div class="flex items-center justify-between">
+                <h2 class="text-2xl font-medium">
+                  {{
+                    formatPrice(
+                      calculateNetSales(
+                        reportsTotal.paid?.subtotal,
+                        reportsTotal.refunded?.subtotal,
+                        reportsTotal.paid?.discount -
+                          reportsTotal.refunded?.discount
+                      )
+                    )
+                  }}
+                </h2>
+              </div>
+            </UCard>
+            <UCard>
+              <p class="mb-1 text-(--ui-text-dimmed)">
+                Total Paid Transactions
+              </p>
+              <div class="flex items-center justify-between">
+                <h2 class="text-2xl font-medium">
+                  {{ reportsTotal.paid_transactions }}
+                </h2>
+              </div>
+            </UCard>
+            <UCard>
+              <p class="mb-1 text-(--ui-text-dimmed)">
+                Total Refunded Transactions
+              </p>
+              <div class="flex items-center justify-between">
+                <h2 class="text-2xl font-medium">
+                  {{ reportsTotal.refunded_transactions }}
+                </h2>
+              </div>
+            </UCard>
+          </div>
           <div class="rounded-lg border shadow-sm">
             <Table>
               <TableHeader>
@@ -212,6 +283,72 @@ definePageMeta({
           </div>
         </TabsContent>
         <TabsContent value="payment-method">
+          <div
+            class="grid auto-rows-min gap-4 lg:grid-cols-2 xl:grid-cols-3 mb-4"
+          >
+            <UCard>
+              <p class="mb-1 text-(--ui-text-dimmed)">Total Tendered</p>
+              <div class="flex items-center justify-between">
+                <h2 class="text-2xl font-medium">
+                  {{
+                    formatPrice(
+                      reportsTotal.paid?.total - reportsTotal.refunded?.total
+                    )
+                  }}
+                </h2>
+              </div>
+            </UCard>
+            <UCard>
+              <p class="mb-1 text-(--ui-text-dimmed)">Total Paid</p>
+              <div class="flex items-center justify-between">
+                <h2 class="text-2xl font-medium">
+                  {{
+                    formatPrice(
+                      reportsTotal.paid?.bank_transfer -
+                        reportsTotal.refunded?.bank_transfer
+                    )
+                  }}
+                </h2>
+              </div>
+            </UCard>
+            <UCard>
+              <p class="mb-1 text-(--ui-text-dimmed)">Total E-Wallet</p>
+              <div class="flex items-center justify-between">
+                <h2 class="text-2xl font-medium">
+                  {{
+                    formatPrice(
+                      reportsTotal.paid?.ewallet -
+                        reportsTotal.refunded?.ewallet
+                    )
+                  }}
+                </h2>
+              </div>
+            </UCard>
+            <UCard>
+              <p class="mb-1 text-(--ui-text-dimmed)">Total QRIS</p>
+              <div class="flex items-center justify-between">
+                <h2 class="text-2xl font-medium">
+                  {{
+                    formatPrice(
+                      reportsTotal.paid?.qris - reportsTotal.refunded?.qris
+                    )
+                  }}
+                </h2>
+              </div>
+            </UCard>
+            <UCard>
+              <p class="mb-1 text-(--ui-text-dimmed)">Total Cash</p>
+              <div class="flex items-center justify-between">
+                <h2 class="text-2xl font-medium">
+                  {{
+                    formatPrice(
+                      reportsTotal.paid?.cash - reportsTotal.refunded?.cash
+                    )
+                  }}
+                </h2>
+              </div>
+            </UCard>
+          </div>
           <div class="rounded-lg border shadow-sm">
             <Table>
               <TableHeader>
