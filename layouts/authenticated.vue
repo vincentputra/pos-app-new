@@ -10,7 +10,7 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
   SidebarProvider,
-  SidebarRail,
+  SidebarLink,
   SidebarTrigger,
 } from "@/components/ui/sidebar";
 
@@ -22,7 +22,7 @@ import {
 } from "lucide-vue-next";
 
 import { useRoute } from "vue-router";
-import { watch, onMounted, nextTick, ref } from "vue";
+import { watch, onMounted, ref } from "vue";
 import { useAuth } from "@/composables/useAuth";
 import { toast } from "vue-sonner";
 
@@ -226,9 +226,9 @@ onMounted(async () => {
                     :is-active="item.isActive"
                     :class="[item.isActive ? 'font-semibold' : '']"
                   >
-                    <NuxtLink :to="item.path" class="w-full">
+                    <SidebarLink :to="item.path" class="w-full">
                       {{ item.name }}
-                    </NuxtLink>
+                    </SidebarLink>
                   </SidebarMenuSubButton>
                 </CollapsibleTrigger>
 
@@ -243,9 +243,9 @@ onMounted(async () => {
                         :class="[childItem.isActive ? 'font-semibold' : '']"
                         :is-active="childItem.isActive"
                       >
-                        <NuxtLink :to="childItem.path" class="w-full">
+                        <SidebarLink :to="childItem.path" class="w-full">
                           {{ childItem.name }}
-                        </NuxtLink>
+                        </SidebarLink>
                       </SidebarMenuSubButton>
                     </SidebarMenuSubItem>
                   </SidebarMenuSub>
@@ -275,7 +275,6 @@ onMounted(async () => {
           </SidebarMenuItem>
         </SidebarMenu>
       </SidebarFooter>
-      <SidebarRail />
     </Sidebar>
     <SidebarInset class="flex-row overflow-hidden">
       <header
