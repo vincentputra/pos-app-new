@@ -131,7 +131,9 @@ definePageMeta({
               <p class="mb-1 text-(--ui-text-dimmed)">Total Gross Sales</p>
               <div class="flex items-center justify-between">
                 <h2 class="text-2xl font-medium">
-                  {{ formatPrice(reportsTotal.paid?.subtotal) }}
+                  {{
+                    formatPrice((reportsTotal as any)?.sum_paid_subtotal || 0)
+                  }}
                 </h2>
               </div>
             </UCard>
@@ -139,7 +141,11 @@ definePageMeta({
               <p class="mb-1 text-(--ui-text-dimmed)">Total Refunds</p>
               <div class="flex items-center justify-between">
                 <h2 class="text-2xl font-medium">
-                  {{ formatPrice(reportsTotal.refunded?.subtotal) }}
+                  {{
+                    formatPrice(
+                      (reportsTotal as any)?.sum_refunded_subtotal || 0
+                    )
+                  }}
                 </h2>
               </div>
             </UCard>
@@ -149,8 +155,8 @@ definePageMeta({
                 <h2 class="text-2xl font-medium">
                   {{
                     formatPrice(
-                      reportsTotal.paid?.discount -
-                        reportsTotal.refunded?.discount
+                      (reportsTotal as any)?.sum_paid_discount -
+                        (reportsTotal as any)?.sum_refunded_discount
                     )
                   }}
                 </h2>
@@ -163,10 +169,10 @@ definePageMeta({
                   {{
                     formatPrice(
                       calculateNetSales(
-                        reportsTotal.paid?.subtotal,
-                        reportsTotal.refunded?.subtotal,
-                        reportsTotal.paid?.discount -
-                          reportsTotal.refunded?.discount
+                        (reportsTotal as any)?.sum_paid_subtotal || 0,
+                        (reportsTotal as any)?.sum_refunded_subtotal || 0,
+                        (reportsTotal as any)?.sum_paid_discount -
+                          (reportsTotal as any)?.sum_refunded_discount
                       )
                     )
                   }}
@@ -179,7 +185,7 @@ definePageMeta({
               </p>
               <div class="flex items-center justify-between">
                 <h2 class="text-2xl font-medium">
-                  {{ reportsTotal.paid_transactions }}
+                  {{ (reportsTotal as any)?.paid_count || 0 }}
                 </h2>
               </div>
             </UCard>
@@ -189,7 +195,7 @@ definePageMeta({
               </p>
               <div class="flex items-center justify-between">
                 <h2 class="text-2xl font-medium">
-                  {{ reportsTotal.refunded_transactions }}
+                  {{ (reportsTotal as any)?.refunded_count || 0 }}
                 </h2>
               </div>
             </UCard>
@@ -242,29 +248,29 @@ definePageMeta({
                 </template>
                 <template v-else-if="reports.length">
                   <TableRow v-for="(trans, index) in reports" :key="trans.id">
-                    <TableCell>{{ formatDate(trans.date) }}</TableCell>
+                    <TableCell>{{ formatDate(trans.trans_date) }}</TableCell>
                     <TableCell>{{
-                      formatPrice(trans.paid["subtotal"])
+                      formatPrice(trans.sum_paid_subtotal)
                     }}</TableCell>
                     <TableCell>{{
-                      formatPrice(trans.refunded["subtotal"])
+                      formatPrice(trans.sum_refunded_subtotal)
                     }}</TableCell>
                     <TableCell>{{
                       formatPrice(
-                        trans.paid["discount"] - trans.refunded["discount"]
+                        trans.sum_paid_discount - trans.sum_refunded_discount
                       )
                     }}</TableCell>
                     <TableCell>{{
                       formatPrice(
                         calculateNetSales(
-                          trans.paid["subtotal"],
-                          trans.refunded["subtotal"],
-                          trans.paid["discount"] - trans.refunded["discount"]
+                          trans.sum_paid_subtotal,
+                          trans.sum_refunded_subtotal,
+                          trans.sum_paid_discount - trans.sum_refunded_discount
                         )
                       )
                     }}</TableCell>
-                    <TableCell>{{ trans.paid_transactions }}</TableCell>
-                    <TableCell>{{ trans.refunded_transactions }}</TableCell>
+                    <TableCell>{{ trans.paid_count }}</TableCell>
+                    <TableCell>{{ trans.refunded_count }}</TableCell>
                     <TableCell>
                       <div class="flex gap-2">
                         <Button
@@ -292,7 +298,8 @@ definePageMeta({
                 <h2 class="text-2xl font-medium">
                   {{
                     formatPrice(
-                      reportsTotal.paid?.total - reportsTotal.refunded?.total
+                      (reportsTotal as any)?.sum_paid_price -
+                        (reportsTotal as any)?.sum_refunded_price
                     )
                   }}
                 </h2>
@@ -304,8 +311,8 @@ definePageMeta({
                 <h2 class="text-2xl font-medium">
                   {{
                     formatPrice(
-                      reportsTotal.paid?.bank_transfer -
-                        reportsTotal.refunded?.bank_transfer
+                      (reportsTotal as any)?.sum_bank_transfer_payment -
+                        (reportsTotal as any)?.sum_bank_transfer_refunded
                     )
                   }}
                 </h2>
@@ -317,8 +324,8 @@ definePageMeta({
                 <h2 class="text-2xl font-medium">
                   {{
                     formatPrice(
-                      reportsTotal.paid?.ewallet -
-                        reportsTotal.refunded?.ewallet
+                      (reportsTotal as any)?.sum_ewallet_payment -
+                        (reportsTotal as any)?.sum_ewallet_refunded
                     )
                   }}
                 </h2>
@@ -330,7 +337,8 @@ definePageMeta({
                 <h2 class="text-2xl font-medium">
                   {{
                     formatPrice(
-                      reportsTotal.paid?.qris - reportsTotal.refunded?.qris
+                      (reportsTotal as any)?.sum_qris_payment -
+                        (reportsTotal as any)?.sum_qris_refunded
                     )
                   }}
                 </h2>
@@ -342,7 +350,8 @@ definePageMeta({
                 <h2 class="text-2xl font-medium">
                   {{
                     formatPrice(
-                      reportsTotal.paid?.cash - reportsTotal.refunded?.cash
+                      (reportsTotal as any)?.sum_cash_payment -
+                        (reportsTotal as any)?.sum_cash_refunded
                     )
                   }}
                 </h2>
@@ -371,26 +380,36 @@ definePageMeta({
                 </template>
                 <template v-else-if="reports.length">
                   <TableRow v-for="trans in reports" :key="trans.id">
-                    <TableCell>{{ formatDate(trans.date) }}</TableCell>
-                    <TableCell>{{
-                      formatPrice(trans.paid["total"] - trans.refunded["total"])
-                    }}</TableCell>
+                    <TableCell>{{ formatDate(trans.trans_date) }}</TableCell>
                     <TableCell>{{
                       formatPrice(
-                        trans.paid["bank_transfer"] -
-                          trans.refunded["bank_transfer"]
+                        (trans?.sum_paid_price || 0) -
+                          (trans?.sum_refunded_price || 0)
                       )
                     }}</TableCell>
                     <TableCell>{{
                       formatPrice(
-                        trans.paid["ewallet"] - trans.refunded["ewallet"]
+                        (trans?.sum_bank_transfer_payment || 0) -
+                          (trans?.sum_bank_transfer_refunded || 0)
                       )
                     }}</TableCell>
                     <TableCell>{{
-                      formatPrice(trans.paid["qris"] - trans.refunded["qris"])
+                      formatPrice(
+                        (trans?.sum_ewallet_payment || 0) -
+                          (trans?.sum_ewallet_refunded || 0)
+                      )
                     }}</TableCell>
                     <TableCell>{{
-                      formatPrice(trans.paid["cash"] - trans.refunded["cash"])
+                      formatPrice(
+                        (trans?.sum_qris_payment || 0) -
+                          (trans?.sum_qris_refunded || 0)
+                      )
+                    }}</TableCell>
+                    <TableCell>{{
+                      formatPrice(
+                        (trans?.sum_cash_payment || 0) -
+                          (trans?.sum_cash_refunded || 0)
+                      )
                     }}</TableCell>
                   </TableRow>
                 </template>
@@ -438,24 +457,24 @@ definePageMeta({
           <DialogDescription class="font-medium text-gray-800 space-y-2">
             <div>
               Date:
-              {{ formatDate(reports[selectedTransaction].date) }}
+              {{ formatDate(reports[selectedTransaction].trans_date) }}
             </div>
             <div>
               Gross Sales:
-              {{ formatPrice(reports[selectedTransaction].paid["subtotal"]) }}
+              {{ formatPrice(reports[selectedTransaction].sum_paid_subtotal) }}
             </div>
             <div>
               Refunds:
               {{
-                formatPrice(reports[selectedTransaction].refunded["subtotal"])
+                formatPrice(reports[selectedTransaction].sum_refunded_subtotal)
               }}
             </div>
             <div>
               Discounts:
               {{
                 formatPrice(
-                  reports[selectedTransaction].paid["discount"] -
-                    reports[selectedTransaction].refunded["discount"]
+                  reports[selectedTransaction].sum_paid_discount -
+                    reports[selectedTransaction].sum_refunded_discount
                 )
               }}
             </div>
@@ -464,21 +483,21 @@ definePageMeta({
               {{
                 formatPrice(
                   calculateNetSales(
-                    reports[selectedTransaction].paid["subtotal"],
-                    reports[selectedTransaction].refunded["subtotal"],
-                    reports[selectedTransaction].paid["discount"] -
-                      reports[selectedTransaction].refunded["discount"]
+                    reports[selectedTransaction].sum_paid_subtotal,
+                    reports[selectedTransaction].sum_refunded_subtotal,
+                    reports[selectedTransaction].sum_paid_discount -
+                      reports[selectedTransaction].sum_refunded_discount
                   )
                 )
               }}
             </div>
             <div>
               Paid Transactions:
-              {{ reports[selectedTransaction].paid_transactions }}
+              {{ reports[selectedTransaction].paid_count }}
             </div>
             <div>
               Refunded Transactions:
-              {{ reports[selectedTransaction].refunded_transactions }}
+              {{ reports[selectedTransaction].refunded_count }}
             </div>
           </DialogDescription>
         </DialogHeader>

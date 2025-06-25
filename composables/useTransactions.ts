@@ -406,7 +406,6 @@ export const useTransactions = () => {
           parameter +
           `&date_from=${payload.date_range.start.toString()}&date_to=${payload.date_range.end.toString()}`;
       }
-      console.log(parameter);
       const { data, error } = await useFetch<{
         data: any[];
         totals: any[];

@@ -125,30 +125,32 @@ const updateSummaryData = async () => {
 
   reports.value.reverse().forEach((report) => {
     report.netSales = calculateNetSales(
-      report.paid["subtotal"],
-      report.refunded["subtotal"],
-      report.paid["discount"] - report.refunded["discount"]
+      Number(report.sum_paid_subtotal),
+      Number(report.sum_refunded_subtotal),
+      Number(report.sum_paid_discount) - Number(report.sum_refunded_discount)
     );
 
-    totalGrossSales += report.paid["subtotal"];
-    totalDiscounts += report.paid["discount"] - report.refunded["discount"];
-    totalRefunds += report.refunded["subtotal"];
-    totalNetSales += report.netSales;
-    totalPaidTransactions += report.paid_transactions;
-    totalRefundTransactions += report.refunded_transactions;
+    totalGrossSales += Number(report.sum_paid_subtotal);
+    totalDiscounts +=
+      Number(report.sum_paid_discount) - Number(report.sum_refunded_discount);
+    totalRefunds += Number(report.sum_refunded_subtotal);
+    totalNetSales += Number(report.netSales);
+    totalPaidTransactions += Number(report.paid_count);
+    totalRefundTransactions += Number(report.refunded_count);
 
     summaryChartData.value.push({
-      month: formatMonthChart(new Date(report.date)),
-      grossSales: report.paid["subtotal"],
-      discounts: report.paid["discount"] - report.refunded["discount"],
-      refunds: report.refunded["subtotal"],
-      netSales: report.netSales,
+      month: formatMonthChart(new Date(report.trans_date)),
+      grossSales: Number(report.sum_paid_subtotal),
+      discounts:
+        Number(report.sum_paid_discount) - Number(report.sum_refunded_discount),
+      refunds: Number(report.sum_refunded_subtotal),
+      netSales: Number(report.netSales),
     });
 
     transactionsChartData.value.push({
-      month: formatMonthChart(new Date(report.date)),
-      paid: report.paid_transactions,
-      refunded: report.refunded_transactions,
+      month: formatMonthChart(new Date(report.trans_date)),
+      paid: Number(report.paid_count),
+      refunded: Number(report.refunded_count),
     });
   });
 
