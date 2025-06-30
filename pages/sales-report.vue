@@ -66,6 +66,20 @@ const filterByDate = async (payload: any) => {
   await handlePageChange(1);
 };
 
+const totalSoldQuantity = (products: any[]) => {
+  return products.reduce(
+    (sum, product) => sum + Number(product.sold_quantity || 0),
+    0
+  );
+};
+
+const totalRefundedQuantity = (products: any[]) => {
+  return products.reduce(
+    (sum, product) => sum + Number(product.refunded_quantity || 0),
+    0
+  );
+};
+
 const openProductModal = async (id: number) => {
   selectedTransaction.value = id;
   isModalOpen.value = true;
@@ -520,6 +534,14 @@ definePageMeta({
               </TableRow>
             </TableBody>
           </Table>
+        </div>
+        <div class="text-sm font-medium text-gray-800">
+          Total Sold Quantity:
+          {{ totalSoldQuantity(reports[selectedTransaction].products) }}
+        </div>
+        <div class="text-sm font-medium text-gray-800">
+          Total Refunded Quantity:
+          {{ totalRefundedQuantity(reports[selectedTransaction].products) }}
         </div>
         <DialogFooter>
           <Button type="button" variant="ghost" @click="isModalOpen = false">

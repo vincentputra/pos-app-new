@@ -114,7 +114,8 @@ export const useTransactions = () => {
     { id: "qris", name: "QRIS" },
     { id: "cash", name: "Cash" },
   ];
-  const taxAmount = 10 / 100;
+  //const taxAmount = 10 / 100;
+  const taxAmount = 0;
   const grossSalesInfo =
     "Gross sales are calculated by adding together all sales receipts before discounts and refunds.";
   const netSalesInfo =

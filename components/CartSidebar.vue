@@ -291,7 +291,7 @@ watch(
             </Button>
           </div>
         </div>
-        <div class="flex justify-between text-gray-600">
+        <div class="flex justify-between text-gray-600" v-if="taxAmount > 0">
           <span>Tax ({{ taxAmount * 100 }}%)</span>
           <span>{{ formatPrice(tax) }}</span>
         </div>

@@ -174,6 +174,20 @@ const openDetailModal = async (id: number) => {
   isModalOpen.value = true;
 };
 
+const totalSoldQuantity = (products: any[]) => {
+  return products.reduce(
+    (sum, product) => sum + Number(product.sold_quantity || 0),
+    0
+  );
+};
+
+const totalRefundedQuantity = (products: any[]) => {
+  return products.reduce(
+    (sum, product) => sum + Number(product.refunded_quantity || 0),
+    0
+  );
+};
+
 definePageMeta({
   layout: "authenticated",
   middleware: ["auth"],
@@ -369,7 +383,7 @@ definePageMeta({
             </TableBody>
           </Table>
 
-          <Table class="mt-4" v-if="shiftDetail.products.length > 0">
+          <Table class="mt-4" v-if="(shiftDetail as any).products.length > 0">
             <TableHeader>
               <TableRow>
                 <TableHead class="w-[150px]">Product</TableHead>
@@ -378,13 +392,24 @@ definePageMeta({
               </TableRow>
             </TableHeader>
             <TableBody>
-              <TableRow v-for="product in shiftDetail.products">
+              <TableRow
+                v-for="product in shiftDetail?.products || []"
+                :key="product.id"
+              >
                 <TableCell>{{ product.name }}</TableCell>
                 <TableCell>{{ product.sold_quantity }}</TableCell>
                 <TableCell>{{ product.refunded_quantity }}</TableCell>
               </TableRow>
             </TableBody>
           </Table>
+        </div>
+        <div class="text-sm font-medium text-gray-800">
+          Total Sold Quantity:
+          {{ totalSoldQuantity(shiftDetail?.products || []) }}
+        </div>
+        <div class="text-sm font-medium text-gray-800">
+          Total Refunded Quantity:
+          {{ totalRefundedQuantity(shiftDetail?.products || []) }}
         </div>
         <DialogFooter>
           <Button type="button" variant="ghost" @click="isModalOpen = false">
